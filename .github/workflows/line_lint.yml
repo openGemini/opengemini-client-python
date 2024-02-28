@@ -1,0 +1,13 @@
+name: line lint
+on:
+  pull_request:
+    branches:
+      - main
+jobs:
+  line_lint:
+    name: line lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: linelint
+        uses: fernandrone/linelint@master
