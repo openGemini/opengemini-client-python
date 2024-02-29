@@ -28,3 +28,5 @@ class AuthType:
     """
     AuthType reprensents the type of identity authentication
     """
+    AUTH_TPYE_PASSWORD = 0
+    AUTH_TPYE_TOKE = 1
