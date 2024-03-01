@@ -7,20 +7,20 @@ class UrlConst:
     """
     url const class
     """
-    PING = '/ping'
-    QUERY = '/query'
-    STATUS = '/status'
-    WRITE = '/write'
+    URL_PING = '/ping'
+    URL_QUERY = '/query'
+    URL_STATUS = '/status'
+    URL_WRITE = '/write'
 
     no_auth_required = {
-        PING: {
+        URL_PING: {
             'GET': {},
             'HEAD': {}
         },
-        QUERY: {
+        URL_QUERY: {
             'OPTIONS': {}
         },
-        STATUS: {
+        URL_STATUS: {
             'GET': {},
             'HEAD': {}
         }
