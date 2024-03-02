@@ -46,7 +46,7 @@ class Client(ABC):
     def create_database_with_rp(self, database: str, rp_config: object) -> str:
         """
         create database with retention policy
-        :param database: database need to create
+        :param database: database that need to create
         :param rp_config: RpCconfig object
         :return: return an error message of string type
         """
