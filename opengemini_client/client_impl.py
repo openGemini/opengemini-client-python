@@ -127,7 +127,7 @@ class Client:
         return qr
 
 
-def new_client(config: Config) -> Client:
+def _new_client(config: Config) -> Client:
     """
     creates a new client
     :param config: config object
@@ -175,3 +175,7 @@ def build_endpoints(address: list[Address], tls_enabled: bool) -> list:
         urls.append(url)
 
     return urls
+
+
+def new_client(config: Config) -> Client:
+    return _new_client(config)

@@ -5,17 +5,7 @@ RetentionPolicy module
 from abc import ABC
 
 from opengemini_client.client import Client
-from opengemini_client.series import Series
-
-
-class SeriesResult:
-    """
-    SeriesResult class
-    """
-
-    def __init__(self, series: list[Series], error: str):
-        self.series = series
-        self.error = error
+from opengemini_client.common import SeriesResult
 
 
 class QueryResult(Client, ABC):

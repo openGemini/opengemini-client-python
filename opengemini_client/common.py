@@ -97,3 +97,25 @@ class Config:
         self.gzip_enabled = gzip_enabled
         self.tls_enabled = tls_enabled
         self.tls_config = tls_config
+
+
+class Series:
+    """
+    Series defines the structure for series data
+    """
+
+    def __init__(self, name: str, tags: dict, columns: list, values: list[dict]):
+        self.name = name
+        self.tags = tags
+        self.columns = columns
+        self.values = values
+
+
+class SeriesResult:
+    """
+    SeriesResult class
+    """
+
+    def __init__(self, series: list[Series], error: str):
+        self.series = series
+        self.error = error

@@ -2,12 +2,9 @@
 client module
 """
 from abc import ABC, abstractmethod
-
-from opengemini_client import client_impl
-from opengemini_client.common import Config
+from opengemini_client.common import RpCconfig
 from opengemini_client.point import BatchPoints
 from opengemini_client.query import Query
-from opengemini_client.query_result import QueryResult
 from opengemini_client.retention_policy import RetentionPolicy
 
 
@@ -25,7 +22,7 @@ class Client(ABC):
         """
 
     @abstractmethod
-    def query(self, query: Query) -> tuple[QueryResult, str]:
+    def query(self, query: Query) -> tuple[Query, str]:
         """
         query result
         :param query: query object
@@ -93,7 +90,3 @@ class Client(ABC):
         :return: return a two-tuple. the first one is a list whose elements are the retention policy
          and the second is an error message
         """
-
-
-def new_client(config: Config) -> Client:
-    return client_impl.new_client(config)

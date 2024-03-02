@@ -1,9 +1,10 @@
 """
 Points module
 """
+import time
 from abc import ABC
 from enum import Enum, auto
-import time
+
 from opengemini_client.client import Client
 
 
