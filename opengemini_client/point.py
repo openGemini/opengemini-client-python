@@ -4,7 +4,7 @@ Points module
 from abc import ABC
 from enum import Enum, auto
 import time
-from client import Client
+from opengemini_client.client import Client
 
 
 class PrecisionType(Enum):
