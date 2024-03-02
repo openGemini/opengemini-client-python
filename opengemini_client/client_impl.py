@@ -6,9 +6,9 @@ from http import HTTPStatus
 
 import requests
 
-from opengemini_client.client import Address
-from opengemini_client.client import AuthType
-from opengemini_client.client import Config
+from opengemini_client.common import Address
+from opengemini_client.common import AuthType
+from opengemini_client.common import Config
 from opengemini_client.query import Query
 from opengemini_client.query_result import QueryResult
 from opengemini_client.url_const import UrlConst
