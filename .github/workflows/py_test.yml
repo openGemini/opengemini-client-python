@@ -1,4 +1,4 @@
-name: Unit Test
+name: py test
 on:
   pull_request:
     branches:
