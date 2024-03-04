@@ -46,3 +46,56 @@ class SeriesResult:
 class QueryResult:
     results: List[SeriesResult] = field(default_factory=list)
     error: str = ""
+
+
+@dataclass
+class Query:
+    database: str
+    command: str
+    retention_policy: str
+
+
+@dataclass
+class Address:
+    host: str
+    port: int
+
+
+@dataclass
+class AuthType:
+    AUTH_TYPE_PASSWORD: int = 0
+    AUTH_TYPE_TOKE: int = 1
+
+
+@dataclass
+class AuthConfig:
+    auth_type: AuthType
+    username: str
+    password: str
+    token: str
+
+
+@dataclass
+class BatchConfig:
+    batch_interval: int
+    batch_size: int
+
+
+@dataclass
+class RpCconfig:
+    name: str
+    duration: str
+    shard_group_duration: str
+    index_duration: str
+
+
+@dataclass
+class Config:
+    address: List[Address]
+    auth_config: AuthConfig
+    batch_config: BatchConfig
+    timeout: str
+    connection_timeout: str
+    gzip_enabled: bool
+    tls_enabled: bool
+    tls_config: bool
