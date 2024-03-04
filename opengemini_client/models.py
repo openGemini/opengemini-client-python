@@ -1,5 +1,7 @@
+import ssl
 from dataclasses import field, dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
+from enum import Enum
 from typing import Dict, Union, Optional, List, Any
 
 
@@ -7,6 +9,35 @@ from typing import Dict, Union, Optional, List, Any
 class Address:
     host: str
     port: int
+
+
+class AuthType(Enum):
+    PASSWORD = 0
+    TOKEN = 1
+
+
+@dataclass
+class AuthConfig:
+    auth_type: AuthType
+    username: str = ''
+    password: str = ''
+    token: str = ''
+
+
+@dataclass
+class BatchConfig:
+    batch_interval: int
+    batch_size: int
+
+
+@dataclass
+class Config:
+    address: List[Address]
+    timeout: timedelta
+    connection_timeout: timedelta
+    gzip_enabled: bool
+    tls_enabled: bool
+    tls_config: ssl.SSLContext
 
 
 @dataclass
