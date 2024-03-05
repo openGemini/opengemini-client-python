@@ -4,6 +4,12 @@ from typing import Dict, Union, Optional, List, Any
 
 
 @dataclass
+class Address:
+    host: str
+    port: int
+
+
+@dataclass
 class Point:
     measurement: str
     fields: Dict[str, Union[str, int, float, bool]]
@@ -43,12 +49,6 @@ class SeriesResult:
 
 
 @dataclass
-class QueryResult:
-    results: List[SeriesResult] = field(default_factory=list)
-    error: str = ""
-
-
-@dataclass
 class Query:
     database: str
     command: str
@@ -56,58 +56,6 @@ class Query:
 
 
 @dataclass
-class Address:
-    host: str
-    port: int
-
-
-@dataclass
-class AuthType:
-    AUTH_TYPE_PASSWORD: int = 0
-    AUTH_TYPE_TOKE: int = 1
-
-
-@dataclass
-class AuthConfig:
-    auth_type: AuthType
-    username: str
-    password: str
-    token: str
-
-
-@dataclass
-class BatchConfig:
-    batch_interval: int
-    batch_size: int
-
-
-@dataclass
-class RpCconfig:
-    name: str
-    duration: str
-    shard_group_duration: str
-    index_duration: str
-
-
-@dataclass
-class Config:
-    address: List[Address]
-    auth_config: AuthConfig
-    batch_config: BatchConfig
-    timeout: str
-    connection_timeout: str
-    gzip_enabled: bool
-    tls_enabled: bool
-    tls_config: bool
-
-
-@dataclass
-class Endpoint:
-    url: str
-
-
-@dataclass
-class RequestDetails:
-    query_values: str
-    headers: Dict[str, str]
-    body: Any
+class QueryResult:
+    results: List[SeriesResult] = field(default_factory=list)
+    error: str = ""
