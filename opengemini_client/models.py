@@ -107,8 +107,8 @@ class Config:
     address: List[Address]
     auth_config: AuthConfig
     batch_config: BatchConfig
-    timeout: str
-    connection_timeout: str
+    timeout: int
+    connection_timeout: int
     gzip_enabled: bool
     tls_enabled: bool
     tls_config: bool
