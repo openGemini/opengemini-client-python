@@ -112,3 +112,15 @@ class Config:
     gzip_enabled: bool
     tls_enabled: bool
     tls_config: bool
+
+
+@dataclass
+class Endpoint:
+    url: str
+
+
+@dataclass
+class RequestDetails:
+    query_values: str
+    headers: Dict[str, str]
+    body: Any
