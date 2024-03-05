@@ -4,6 +4,12 @@ from typing import Dict, Union, Optional, List, Any
 
 
 @dataclass
+class Address:
+    host: str
+    port: int
+
+
+@dataclass
 class Point:
     measurement: str
     fields: Dict[str, Union[str, int, float, bool]]
@@ -40,6 +46,13 @@ class Series:
 class SeriesResult:
     series: List[Series] = field(default_factory=list)
     error: str = ""
+
+
+@dataclass
+class Query:
+    database: str
+    command: str
+    retention_policy: str
 
 
 @dataclass
