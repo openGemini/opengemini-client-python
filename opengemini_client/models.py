@@ -33,6 +33,8 @@ class BatchConfig:
 @dataclass
 class Config:
     address: List[Address]
+    auth_config: AuthConfig
+    batch_config: BatchConfig
     timeout: timedelta
     connection_timeout: timedelta
     gzip_enabled: bool
