@@ -39,7 +39,7 @@ class Config:
     connection_timeout: timedelta
     gzip_enabled: bool
     tls_enabled: bool
-    tls_config: ssl.SSLContext
+    tls_config: ssl.SSLContext = None
 
 
 @dataclass

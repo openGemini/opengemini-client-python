@@ -13,15 +13,15 @@ class UrlConst:
     WRITE = '/write'
 
     no_auth_required = {
-        PING: {
-            'GET': {},
-            'HEAD': {}
+        '/ping': {
+            'GET',
+            'HEAD'
         },
-        QUERY: {
-            'OPTIONS': {}
+        '/query': {
+            'OPTIONS'
         },
-        STATUS: {
-            'GET': {},
-            'HEAD': {}
+        '/status': {
+            'GET',
+            'HEAD'
         }
     }
