@@ -11,16 +11,34 @@ from opengemini_client.client import Client
 from opengemini_client.exceptions import Error
 from opengemini_client.models import Config, BatchPoints, Query
 from opengemini_client.url_const import UrlConst
+from opengemini_client.utils import AtomicInt
 
 
 class OpenGeminiDBClient(Client, ABC):
+    config: Config
+    session: requests.Session
     endpoints: List[str]
+    prevIdx: AtomicInt
 
     def __init__(self, config: Config):
         self.config = config
         self.session = requests.Session()
         protocol = "https://" if config.tls_enabled else "http://"
         self.endpoints = [f"{protocol}{addr.host}:{addr.port}" for addr in config.address]
+        self.prevIdx = AtomicInt(-1)
+        self._set_default_headers()
+
+    def _set_default_headers(self):
+        headers = {'Content-Type': 'application/json'}
+        if self.config.auth_config and self.config.auth_config.auth_type == self.config.auth_config.auth_type.PASSWORD:
+            encode_string = f"{self.config.auth_config.username}:{self.config.auth_config.password}"
+            authorization = "Basic " + base64.b64encode(encode_string.encode()).decode()
+            headers["Authorization"] = authorization
+
+        if self.config.gzip_enabled:
+            headers.update({"Content-Encoding": "gzip", "Accept-Encoding": "gzip"})
+
+        self.session.headers.update(headers)
 
     def close(self):
         self.session.close()
@@ -31,31 +49,7 @@ class OpenGeminiDBClient(Client, ABC):
     def __exit__(self, _exc_type, _exc_val, _exc_tb):
         self.session.close()
 
-    def update_headers(self, method, url_path, headers=None) -> dict:
-        if not self.config.auth_config:
-            return headers
-
-        if headers is None:
-            headers = {}
-
-        headers.setdefault('Content-Type', 'application/json')
-
-        if url_path in UrlConst.no_auth_required:
-            if method in UrlConst.no_auth_required[url_path]:
-                return headers
-
-        if self.config.auth_config.auth_type == self.config.auth_config.auth_type.PASSWORD:
-            encode_string = f"{self.config.auth_config.username}:{self.config.auth_config.password}"
-            authorization = "Basic " + base64.b64encode(encode_string.encode()).decode()
-            headers["Authorization"] = authorization
-
-        if self.config.gzip_enabled:
-            headers.update({"Content-Encoding": "gzip", "Accept-Encoding": "gzip"})
-
-        return headers
-
     def request(self, method, server_url, url_path, headers=None, body=None) -> (requests.Response, Error):
-        headers = self.update_headers(method, url_path, headers)
         full_url = server_url + url_path
         if self.config.gzip_enabled and body is not None:
             compressed = io.BytesIO()
