@@ -3,8 +3,8 @@ client module
 """
 from abc import ABC, abstractmethod
 
-from opengemini_client.models import BatchPoints, QueryResult
 from opengemini_client.exceptions import Error
+from opengemini_client.models import BatchPoints, QueryResult, Query
 
 
 class Client(ABC):
@@ -21,7 +21,7 @@ class Client(ABC):
         """
 
     @abstractmethod
-    def query(self, query: object) -> tuple[QueryResult, Error]:
+    def query(self, query: Query) -> tuple[QueryResult, Error]:
         """
         query result
         :param query: Query object
