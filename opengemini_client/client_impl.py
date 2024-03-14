@@ -91,7 +91,7 @@ class OpenGeminiDBClient(Client, ABC):
 
         return headers
 
-    def request(self, method, server_url, url_path, headers=None, body=None) -> (requests.Response, Error):
+    def request(self, method, server_url, url_path, headers=None, body=None, params=None) -> (requests.Response, Error):
         headers = self.update_headers(method, url_path, headers)
         full_url = server_url + url_path
         if self.config.gzip_enabled and body is not None:
@@ -99,8 +99,10 @@ class OpenGeminiDBClient(Client, ABC):
             with gzip.GzipFile(compresslevel=9, fileobj=compressed, mode='w') as f:
                 f.write(body)
                 body = compressed.getvalue()
+        if params is None:
+            params = {}
 
-        req = requests.Request(method, full_url, data=body, headers=headers)
+        req = requests.Request(method, full_url, data=body, headers=headers, params=params)
         prepared = req.prepare()
         try:
             resp = self.session.send(prepared)
@@ -123,9 +125,18 @@ class OpenGeminiDBClient(Client, ABC):
             return None
         return Error(f"ping openGeminiDB status is {resp.status_code}")
 
-    def query(self, query: Query) -> tuple[QueryResult, Error]:
+    def query(self, query: Query):
+        method = 'GET'
+        if query.command.lower().startswith("select") and "into" in query.command.lower():
+            method = 'POST'
+
         server_url = self.get_server_url()
-        return ()
+        params = {'db': query.database, 'q': query.command, 'rp': query.retention_policy}
+
+        resp, error = self.request(method=method, server_url=server_url, url_path=UrlConst.QUERY, params=params)
+        if resp.status_code == HTTPStatus.OK:
+            return QueryResult(resp.json()), None
+        return None, error
 
     def write_batch_points(self, database: str, batch_points: BatchPoints) -> Error:
         return Error("")

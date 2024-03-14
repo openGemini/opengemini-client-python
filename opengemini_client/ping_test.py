@@ -28,4 +28,5 @@ class TestClient(unittest.TestCase):
                             )
         cli = client_impl.OpenGeminiDBClient(config=cfg)
         error = cli.ping(0)
+        print(error.content)
         self.assertNotEqual(error, None)
