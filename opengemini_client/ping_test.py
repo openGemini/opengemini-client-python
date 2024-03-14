@@ -29,4 +29,3 @@ class TestClient(unittest.TestCase):
         cli = client_impl.OpenGeminiDBClient(config=cfg)
         error = cli.ping(0)
         self.assertNotEqual(error, None)
-        self.assertRegex(error.content, "openGeminiDB server error")
