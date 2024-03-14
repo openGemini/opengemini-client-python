@@ -1,5 +1,6 @@
-import unittest
 import datetime
+import unittest
+
 from opengemini_client import client_impl
 from opengemini_client import models
 
@@ -25,7 +26,6 @@ class TestClient(unittest.TestCase):
                             timeout=datetime.timedelta(seconds=10), connection_timeout=datetime.timedelta(seconds=10),
                             gzip_enabled=False, tls_enabled=False
                             )
-
         cli = client_impl.OpenGeminiDBClient(config=cfg)
         error = cli.ping(0)
         self.assertNotEqual(error, None)
