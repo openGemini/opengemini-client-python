@@ -16,5 +16,10 @@ class QueryTest(unittest.TestCase):
                             )
         with client_impl.OpenGeminiDBClient(cfg) as cli:
             qr = cli.query(query=models.Query('', 'show databases', ''))
-            result = qr.results['results'][0]
-            self.assertEqual(result['statement_id'], 0)
+            self.assertEqual(qr.error, None)
+            results = qr.results
+            self.assertEqual(len(results), 1)
+            result = results[0]
+            self.assertEqual(result.error, None)
+            series = result.series
+            self.assertEqual(len(series), 1)

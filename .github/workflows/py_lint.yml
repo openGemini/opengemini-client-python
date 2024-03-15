@@ -5,7 +5,7 @@ on:
       - main
 jobs:
   py_lint:
-    name: line lint
+    name: py lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
