@@ -10,7 +10,7 @@ import requests
 from requests import HTTPError
 
 from opengemini_client.client import Client
-from opengemini_client.models import Config, BatchPoints, Query, QueryResult
+from opengemini_client.models import Config, BatchPoints, Query, QueryResult, Series, SeriesResult
 from opengemini_client.url_const import UrlConst
 from opengemini_client.utils import AtomicInt
 
@@ -125,7 +125,16 @@ class OpenGeminiDBClient(Client, ABC):
 
         resp = self.request(method='GET', server_url=server_url, url_path=UrlConst.QUERY, params=params)
         if resp.status_code == HTTPStatus.OK:
-            return QueryResult(resp.json())
+            json_data = resp.json()
+            results = []
+
+            for result in json_data.get('results', []):
+                series_list = [Series(name=series['name']) for series in result.get('series', [])]
+                series_result = SeriesResult(series=series_list)
+                results.append(series_result)
+
+            return QueryResult(results=results)
+
         raise HTTPError(f"Query error: {resp.status_code}, Response: {resp.text}")
 
     def write_batch_points(self, database: str, batch_points: BatchPoints):

@@ -76,12 +76,6 @@ class Series:
 
 
 @dataclass
-class SeriesResult:
-    series: List[Series] = field(default_factory=list)
-    error: str = ""
-
-
-@dataclass
 class Query:
     database: str
     command: str
@@ -89,6 +83,12 @@ class Query:
 
 
 @dataclass
+class SeriesResult:
+    series: List[Series] = field(default_factory=list)
+    error: str = None
+
+
+@dataclass
 class QueryResult:
     results: List[SeriesResult] = field(default_factory=list)
-    error: str = ""
+    error: str = None
