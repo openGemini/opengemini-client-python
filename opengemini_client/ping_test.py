@@ -1,12 +1,15 @@
 import datetime
 import unittest
 
+import requests
+
 from opengemini_client import client_impl
 from opengemini_client import models
 
 
-class TestClient(unittest.TestCase):
+class PingTest(unittest.TestCase):
 
+    # noinspection PyMethodMayBeStatic
     def test_ping_success(self):
         cfg = models.Config(address=[models.Address(host='127.0.0.1', port=8086)],
                             auth_config=models.AuthConfig(auth_type=models.AuthType(0)),
@@ -14,10 +17,8 @@ class TestClient(unittest.TestCase):
                             timeout=datetime.timedelta(seconds=10), connection_timeout=datetime.timedelta(seconds=10),
                             gzip_enabled=False, tls_enabled=False
                             )
-        cli = client_impl.OpenGeminiDBClient(config=cfg)
-        error = cli.ping(0)
-        self.assertEqual(error, None)
-        cli.close()
+        with client_impl.OpenGeminiDBClient(config=cfg) as cli:
+            cli.ping(0)
 
     def test_ping_error(self):
         cfg = models.Config(address=[models.Address(host='127.0.0.1', port=8080)],
@@ -26,6 +27,7 @@ class TestClient(unittest.TestCase):
                             timeout=datetime.timedelta(seconds=10), connection_timeout=datetime.timedelta(seconds=10),
                             gzip_enabled=False, tls_enabled=False
                             )
-        cli = client_impl.OpenGeminiDBClient(config=cfg)
-        error = cli.ping(0)
-        self.assertNotEqual(error, None)
+        with client_impl.OpenGeminiDBClient(config=cfg) as cli:
+            with self.assertRaises(requests.exceptions.ConnectionError) as context:
+                cli.ping(0)
+            self.assertRegex(str(context.exception), "Connection refused")

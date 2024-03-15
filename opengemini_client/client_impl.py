@@ -7,9 +7,9 @@ from http import HTTPStatus
 from typing import List
 
 import requests
+from requests import HTTPError
 
 from opengemini_client.client import Client
-from opengemini_client.exceptions import Error
 from opengemini_client.models import Config, BatchPoints, Query, QueryResult
 from opengemini_client.url_const import UrlConst
 from opengemini_client.utils import AtomicInt
@@ -91,7 +91,9 @@ class OpenGeminiDBClient(Client, ABC):
 
         return headers
 
-    def request(self, method, server_url, url_path, headers=None, body=None) -> (requests.Response, Error):
+    def request(self, method, server_url, url_path, headers=None, body=None, params=None) -> requests.Response:
+        if params is None:
+            params = {}
         headers = self.update_headers(method, url_path, headers)
         full_url = server_url + url_path
         if self.config.gzip_enabled and body is not None:
@@ -100,32 +102,31 @@ class OpenGeminiDBClient(Client, ABC):
                 f.write(body)
                 body = compressed.getvalue()
 
-        req = requests.Request(method, full_url, data=body, headers=headers)
+        req = requests.Request(method, full_url, data=body, headers=headers, params=params)
         prepared = req.prepare()
-        try:
-            resp = self.session.send(prepared)
-            if 200 <= resp.status_code < 300:
-                return resp, None
-            return None, Error(f"HTTP error: {resp.status_code}, Response: {resp.text}")
-        except requests.exceptions.RequestException as e:
-            return None, Error(f"Request error: {e}")
+        resp = self.session.send(prepared)
+        if not 200 <= resp.status_code < 300:
+            raise HTTPError(f"HTTP error: {resp.status_code}, Response: {resp.text}")
+        return resp
 
-    def exec_http_request_by_index(self, idx, method, url_path, headers=None, body=None) -> (requests.Response, Error):
+    def exec_http_request_by_index(self, idx, method, url_path, headers=None, body=None) -> requests.Response:
         if idx >= len(self.endpoints) or idx < 0:
-            return Error("openGeminiDB client error. Index out of range"), None
+            raise ValueError("openGeminiDB client error. Index out of range")
         return self.request(method, self.endpoints[idx], url_path, headers, body)
 
     def ping(self, idx: int):
-        resp, error = self.exec_http_request_by_index(idx, 'GET', UrlConst.PING)
-        if error is not None:
-            return error
-        if resp.status_code == HTTPStatus.NO_CONTENT:
-            return None
-        return Error(f"ping openGeminiDB status is {resp.status_code}")
+        resp = self.exec_http_request_by_index(idx, 'GET', UrlConst.PING)
+        if resp.status_code != HTTPStatus.NO_CONTENT:
+            raise HTTPError(f"ping openGeminiDB status is {resp.status_code}")
 
-    def query(self, query: Query) -> tuple[QueryResult, Error]:
+    def query(self, query: Query) -> QueryResult:
         server_url = self.get_server_url()
-        return ()
+        params = {'db': query.database, 'q': query.command, 'rp': query.retention_policy}
 
-    def write_batch_points(self, database: str, batch_points: BatchPoints) -> Error:
-        return Error("")
+        resp = self.request(method='GET', server_url=server_url, url_path=UrlConst.QUERY, params=params)
+        if resp.status_code == HTTPStatus.OK:
+            return QueryResult(resp.json())
+        raise HTTPError(f"Query error: {resp.status_code}, Response: {resp.text}")
+
+    def write_batch_points(self, database: str, batch_points: BatchPoints):
+        return

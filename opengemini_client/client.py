@@ -3,7 +3,6 @@ client module
 """
 from abc import ABC, abstractmethod
 
-from opengemini_client.exceptions import Error
 from opengemini_client.models import BatchPoints, QueryResult, Query
 
 
@@ -13,7 +12,7 @@ class Client(ABC):
     """
 
     @abstractmethod
-    def ping(self, idx: int) -> Error:
+    def ping(self, idx: int):
         """
         check that status of cluster
         :param idx:  index
@@ -21,7 +20,7 @@ class Client(ABC):
         """
 
     @abstractmethod
-    def query(self, query: Query) -> tuple[QueryResult, Error]:
+    def query(self, query: Query) -> QueryResult:
         """
         query result
         :param query: Query object
@@ -29,7 +28,7 @@ class Client(ABC):
         """
 
     @abstractmethod
-    def write_batch_points(self, database: str, batch_points: BatchPoints) -> Error:
+    def write_batch_points(self, database: str, batch_points: BatchPoints):
         """
         batch points to assigned database
         :param database:  name
