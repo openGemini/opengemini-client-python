@@ -7,7 +7,7 @@ from opengemini_client import models
 
 class QueryTest(unittest.TestCase):
 
-    def test_query_databases_success(self):
+    def test_query_no_db_in_opengemini(self):
         cfg = models.Config(address=[models.Address(host='127.0.0.1', port=8086)],
                             auth_config=models.AuthConfig(auth_type=models.AuthType(0)),
                             batch_config=models.BatchConfig(batch_size=10, batch_interval=10),
@@ -22,4 +22,4 @@ class QueryTest(unittest.TestCase):
             result = results[0]
             self.assertEqual(result.error, None)
             series = result.series
-            self.assertEqual(len(series), 1)
+            self.assertEqual(len(series), 0)
