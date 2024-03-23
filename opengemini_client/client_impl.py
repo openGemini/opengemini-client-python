@@ -129,7 +129,11 @@ class OpenGeminiDBClient(Client, ABC):
             results = []
 
             for result in json_data.get('results', []):
-                series_list = [Series(name=series['name']) for series in result.get('series', [])]
+                series_list: List[Series] = [
+                    Series(name=series['name'], columns=series['columns'], values=series['values'])
+                    for series in result.get('series', [])
+                    if series.get('values', [])
+                ]
                 series_result = SeriesResult(series=series_list)
                 results.append(series_result)
 
