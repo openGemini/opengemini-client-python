@@ -10,7 +10,7 @@ import requests
 from requests import HTTPError
 
 from opengemini_client.client import Client
-from opengemini_client.models import Config, BatchPoints, Query, QueryResult, Series, SeriesResult
+from opengemini_client.models import Config, BatchPoints, Query, QueryResult, Series, SeriesResult, RpConfig
 from opengemini_client.url_const import UrlConst
 from opengemini_client.utils import AtomicInt
 
@@ -41,6 +41,29 @@ def check_config(config: Config):
         config.connection_timeout = datetime.timedelta(seconds=10)
 
     return config
+
+
+def convert_to_query_result(json_data):
+    results = []
+    for result in json_data.get('results', []):
+        series_list: List[Series] = [
+            Series(name=series.get('name', ''), columns=series['columns'], values=series['values'])
+            for series in result.get('series', [])
+            if series.get('values', [])
+        ]
+        series_result = SeriesResult(series=series_list, error=result.get('error'))
+        results.append(series_result)
+
+    return QueryResult(results=results, error=json_data.get('error'))
+
+
+def resolve_query_body(resp: requests.Response):
+    json_data = resp.json()
+    qr = convert_to_query_result(json_data)
+    err = qr.get_error()
+    if len(err) > 0:
+        raise HTTPError(f"query result has error: {err}")
+    return qr
 
 
 class OpenGeminiDBClient(Client, ABC):
@@ -125,21 +148,65 @@ class OpenGeminiDBClient(Client, ABC):
 
         resp = self.request(method='GET', server_url=server_url, url_path=UrlConst.QUERY, params=params)
         if resp.status_code == HTTPStatus.OK:
-            json_data = resp.json()
-            results = []
-
-            for result in json_data.get('results', []):
-                series_list: List[Series] = [
-                    Series(name=series['name'], columns=series['columns'], values=series['values'])
-                    for series in result.get('series', [])
-                    if series.get('values', [])
-                ]
-                series_result = SeriesResult(series=series_list)
-                results.append(series_result)
-
-            return QueryResult(results=results)
-
+            return resolve_query_body(resp)
         raise HTTPError(f"Query error: {resp.status_code}, Response: {resp.text}")
 
     def write_batch_points(self, database: str, batch_points: BatchPoints):
-        return
+        server_url = self.get_server_url()
+        params = {'db': database}
+        writer = io.StringIO()
+        for bp in batch_points.points:
+            if bp is None:
+                continue
+            writer.write(bp.to_string())
+            writer.write('\n')
+        body = writer.getvalue().encode()
+        writer.close()
+        resp = self.request(method="POST", server_url=server_url, url_path=UrlConst.WRITE, params=params, body=body)
+        if resp.status_code != HTTPStatus.NO_CONTENT:
+            raise HTTPError(f"write error: {resp.status_code}, Response: {resp.text}")
+
+    def create_database(self, database: str):
+        server_url = self.get_server_url()
+        params = {'q': 'create database ' + database}
+
+        resp = self.request(method='POST', server_url=server_url, url_path=UrlConst.QUERY, params=params)
+        if resp.status_code == HTTPStatus.OK:
+            return resolve_query_body(resp)
+        raise HTTPError(f"create_database error: {resp.status_code}, Response: {resp.text}")
+
+    def create_database_with_rp(self, database: str, rp: RpConfig):
+        server_url = self.get_server_url()
+        writer = io.StringIO()
+        writer.write(f'CREATE DATABASE "{database}" WITH DURATION {rp.duration} REPLICATION 1')
+        if len(rp.shard_group_duration) > 0:
+            writer.write(f' SHARD DURATION {rp.shard_group_duration}')
+        if len(rp.index_duration) > 0:
+            writer.write(f' INDEX DURATION {rp.index_duration}')
+        writer.write(f' NAME {rp.name}')
+        params = {'q': writer.getvalue()}
+        writer.close()
+        resp = self.request(method='POST', server_url=server_url, url_path=UrlConst.QUERY, params=params)
+        if resp.status_code == HTTPStatus.OK:
+            return resolve_query_body(resp)
+        raise HTTPError(f"create_database_with_rp error: {resp.status_code}, Response: {resp.text}")
+
+    def show_databases(self) -> List[str]:
+        qr = self.query(Query(database='', command='SHOW DATABASES', retention_policy=''))
+        res = []
+        if len(qr.results) == 0 or len(qr.results[0].series) == 0:
+            return res
+        for database in qr.results[0].series[0].values:
+            if len(database) == 0:
+                continue
+            res.append(database[0])
+        return res
+
+    def drop_database(self, database: str):
+        server_url = self.get_server_url()
+        params = {'q': 'DROP DATABASE ' + database}
+
+        resp = self.request(method='POST', server_url=server_url, url_path=UrlConst.QUERY, params=params)
+        if resp.status_code == HTTPStatus.OK:
+            return resolve_query_body(resp)
+        raise HTTPError(f"drop_database error: {resp.status_code}, Response: {resp.text}")

@@ -2,8 +2,9 @@
 client module
 """
 from abc import ABC, abstractmethod
+from typing import List
 
-from opengemini_client.models import BatchPoints, QueryResult, Query
+from opengemini_client.models import BatchPoints, QueryResult, Query, RpConfig
 
 
 class Client(ABC):
@@ -34,4 +35,29 @@ class Client(ABC):
         :param database:  name
         :param batch_points: BatchPoints object
         :return: return an error message
+        """
+
+    def create_database(self, database: str):
+        """
+        create database
+        :param database: name
+        """
+
+    def create_database_with_rp(self, database: str, rp: RpConfig):
+        """
+        create database with rp config
+        :param database: name
+        :param rp: RpConfig
+        """
+
+    def show_databases(self) -> List[str]:
+        """
+        show databases
+        :return: returns a databases list.
+        """
+
+    def drop_database(self, database: str):
+        """
+        drop database
+        :param database: name
         """
