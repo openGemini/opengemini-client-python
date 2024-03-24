@@ -35,3 +35,9 @@ class Client(ABC):
         :param batch_points: BatchPoints object
         :return: return an error message
         """
+
+    def create_database(self, database: str):
+        """
+        create database
+        :param database: name
+        """

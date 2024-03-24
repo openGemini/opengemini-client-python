@@ -43,6 +43,20 @@ def check_config(config: Config):
     return config
 
 
+def convert_to_query_result(json_data):
+    results = []
+    for result in json_data.get('results', []):
+        series_list: List[Series] = [
+            Series(name=series['name'], columns=series['columns'], values=series['values'])
+            for series in result.get('series', [])
+            if series.get('values', [])
+        ]
+        series_result = SeriesResult(series=series_list)
+        results.append(series_result)
+
+    return QueryResult(results=results)
+
+
 class OpenGeminiDBClient(Client, ABC):
     config: Config
     session: requests.Session
@@ -126,20 +140,31 @@ class OpenGeminiDBClient(Client, ABC):
         resp = self.request(method='GET', server_url=server_url, url_path=UrlConst.QUERY, params=params)
         if resp.status_code == HTTPStatus.OK:
             json_data = resp.json()
-            results = []
-
-            for result in json_data.get('results', []):
-                series_list: List[Series] = [
-                    Series(name=series['name'], columns=series['columns'], values=series['values'])
-                    for series in result.get('series', [])
-                    if series.get('values', [])
-                ]
-                series_result = SeriesResult(series=series_list)
-                results.append(series_result)
-
-            return QueryResult(results=results)
+            return convert_to_query_result(json_data)
 
         raise HTTPError(f"Query error: {resp.status_code}, Response: {resp.text}")
 
     def write_batch_points(self, database: str, batch_points: BatchPoints):
-        return
+        server_url = self.get_server_url()
+        params = {'db': database}
+        writer = io.StringIO()
+        for bp in batch_points.points:
+            if bp is None:
+                continue
+            writer.write(bp.to_string())
+            writer.write('\n')
+        body = writer.getvalue().encode()
+        resp = self.request(method="POST", server_url=server_url, url_path=UrlConst.WRITE, params=params, body=body)
+        if resp.status_code != HTTPStatus.NO_CONTENT:
+            raise HTTPError(f"write error: {resp.status_code}, Response: {resp.text}")
+
+    def create_database(self, database: str):
+        server_url = self.get_server_url()
+        params = {'q': 'create database ' + database}
+
+        resp = self.request(method='POST', server_url=server_url, url_path=UrlConst.QUERY, params=params)
+        if resp.status_code == HTTPStatus.OK:
+            json_data = resp.json()
+            return convert_to_query_result(json_data)
+
+        raise HTTPError(f"create_database error: {resp.status_code}, Response: {resp.text}")
