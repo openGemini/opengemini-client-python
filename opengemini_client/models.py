@@ -92,3 +92,11 @@ class SeriesResult:
 class QueryResult:
     results: List[SeriesResult] = field(default_factory=list)
     error: str = None
+
+    def _has_error(self) -> str:
+        if self.error is not None:
+            return self.error
+        for res in self.results:
+            if res.error is not None:
+                return res.error
+        return ""

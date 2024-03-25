@@ -43,6 +43,26 @@ def check_config(config: Config):
     return config
 
 
+def resolve_query_body(resp: requests.Response):
+    json_data = resp.json()
+    results = [
+        SeriesResult(
+            series=[
+                Series(
+                    name=series.get('name', ''),
+                    columns=series.get('columns', []),
+                    values=series.get('values', [])
+                )
+                for series in result.get('series', [])
+                if series.get('values', [])
+            ],
+            error=result.get('error')
+        )
+        for result in json_data.get('results', [])
+    ]
+    return QueryResult(results=results, error=json_data.get('error'))
+
+
 class OpenGeminiDBClient(Client, ABC):
     config: Config
     session: requests.Session
@@ -125,20 +145,7 @@ class OpenGeminiDBClient(Client, ABC):
 
         resp = self.request(method='GET', server_url=server_url, url_path=UrlConst.QUERY, params=params)
         if resp.status_code == HTTPStatus.OK:
-            json_data = resp.json()
-            results = []
-
-            for result in json_data.get('results', []):
-                series_list: List[Series] = [
-                    Series(name=series['name'], columns=series['columns'], values=series['values'])
-                    for series in result.get('series', [])
-                    if series.get('values', [])
-                ]
-                series_result = SeriesResult(series=series_list)
-                results.append(series_result)
-
-            return QueryResult(results=results)
-
+            return resolve_query_body(resp)
         raise HTTPError(f"Query error: {resp.status_code}, Response: {resp.text}")
 
     def write_batch_points(self, database: str, batch_points: BatchPoints):
