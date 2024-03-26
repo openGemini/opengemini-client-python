@@ -43,6 +43,14 @@ class Config:
 
 
 @dataclass
+class RpConfig:
+    name: str
+    duration: str
+    shard_group_duration: str
+    index_duration: str
+
+
+@dataclass
 class Point:
     measurement: str
     fields: Dict[str, Union[str, int, float, bool]]
