@@ -146,7 +146,16 @@ class OpenGeminiDBClient(Client, ABC):
         resp = self.request(method='GET', server_url=server_url, url_path=UrlConst.QUERY, params=params)
         if resp.status_code == HTTPStatus.OK:
             return resolve_query_body(resp)
-        raise HTTPError(f"Query error: {resp.status_code}, Response: {resp.text}")
+        raise HTTPError(f"Query error_code: {resp.status_code}, error_msg: {resp.text}")
+
+    def _query_post(self, query: Query) -> QueryResult:
+        server_url = self.get_server_url()
+        params = {'db': query.database, 'q': query.command, 'rp': query.retention_policy}
+
+        resp = self.request(method='POST', server_url=server_url, url_path=UrlConst.QUERY, params=params)
+        if resp.status_code == HTTPStatus.OK:
+            return resolve_query_body(resp)
+        raise HTTPError(f"Query error_code: {resp.status_code}, error_msg: {resp.text}")
 
     def write_batch_points(self, database: str, batch_points: BatchPoints):
         return

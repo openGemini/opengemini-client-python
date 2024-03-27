@@ -43,6 +43,18 @@ class Config:
 
 
 @dataclass
+class RetentionPolicy:
+    name: str
+    duration: str
+    shard_group_duration: str
+    hot_duration: str
+    warm_duration: str
+    index_duration: str
+    replica_num: int
+    is_default: bool
+
+
+@dataclass
 class RpConfig:
     name: str
     duration: str
