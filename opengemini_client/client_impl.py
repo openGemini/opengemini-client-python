@@ -163,11 +163,17 @@ class OpenGeminiDBClient(Client, ABC):
     def create_database(self, database: str, rp: RpConfig = None):
         pass
 
-    def create_database_with_rp(self, database: str, ):
-        pass
-
     def show_databases(self) -> List[str]:
         pass
 
     def drop_database(self, database: str):
+        pass
+
+    def create_retention_policy(self, dbname, rp_config: RpConfig, is_default: bool):
+        pass
+
+    def show_retention_policies(self, dbname):
+        pass
+
+    def drop_retention_policy(self, dbname, retention_policy: str):
         pass
