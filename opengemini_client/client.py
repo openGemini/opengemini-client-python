@@ -37,6 +37,7 @@ class Client(ABC):
         :return: return an error message
         """
 
+    @abstractmethod
     def create_database(self, database: str, rp: RpConfig = None):
         """
         create database
@@ -44,14 +45,28 @@ class Client(ABC):
         :param database: name
         """
 
+    @abstractmethod
     def show_databases(self) -> List[str]:
         """
         show databases
         :return: returns a databases list.
         """
 
+    @abstractmethod
     def drop_database(self, database: str):
         """
         drop database
         :param database: name
         """
+
+    @abstractmethod
+    def create_retention_policy(self, dbname, rp_config: RpConfig, is_default: bool):
+        pass
+
+    @abstractmethod
+    def show_retention_policies(self, dbname):
+        pass
+
+    @abstractmethod
+    def drop_retention_policy(self, dbname, retention_policy: str):
+        pass
