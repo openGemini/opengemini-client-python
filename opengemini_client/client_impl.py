@@ -10,7 +10,7 @@ import requests
 from requests import HTTPError
 
 from opengemini_client.client import Client
-from opengemini_client.models import Config, BatchPoints, Query, QueryResult, Series, SeriesResult
+from opengemini_client.models import Config, BatchPoints, Query, QueryResult, Series, SeriesResult, RpConfig
 from opengemini_client.url_const import UrlConst
 from opengemini_client.utils import AtomicInt
 
@@ -150,3 +150,15 @@ class OpenGeminiDBClient(Client, ABC):
 
     def write_batch_points(self, database: str, batch_points: BatchPoints):
         return
+
+    def create_database(self, database: str, rp: RpConfig = None):
+        pass
+
+    def create_database_with_rp(self, database: str, ):
+        pass
+
+    def show_databases(self) -> List[str]:
+        pass
+
+    def drop_database(self, database: str):
+        pass
