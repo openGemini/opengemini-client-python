@@ -126,7 +126,7 @@ class OpenGeminiDBClient(Client, ABC):
         prepared = req.prepare()
         resp = self.session.send(prepared)
         if not 200 <= resp.status_code < 300:
-            raise HTTPError(f"HTTP error: {resp.status_code}, Response: {resp.text}")
+            raise HTTPError(f"error resp, code: {resp.status_code}, resp: {resp.text}")
         return resp
 
     def exec_http_request_by_index(self, idx, method, url_path, headers=None, body=None) -> requests.Response:
@@ -137,7 +137,7 @@ class OpenGeminiDBClient(Client, ABC):
     def ping(self, idx: int):
         resp = self.exec_http_request_by_index(idx, 'GET', UrlConst.PING)
         if resp.status_code != HTTPStatus.NO_CONTENT:
-            raise HTTPError(f"ping openGeminiDB status is {resp.status_code}")
+            raise HTTPError(f"ping failed code: {resp.status_code}, body: {resp.text}")
 
     def query(self, query: Query) -> QueryResult:
         server_url = self.get_server_url()
@@ -146,7 +146,7 @@ class OpenGeminiDBClient(Client, ABC):
         resp = self.request(method='GET', server_url=server_url, url_path=UrlConst.QUERY, params=params)
         if resp.status_code == HTTPStatus.OK:
             return resolve_query_body(resp)
-        raise HTTPError(f"Query error_code: {resp.status_code}, error_msg: {resp.text}")
+        raise HTTPError(f"Query code: {resp.status_code}, body: {resp.text}")
 
     def _query_post(self, query: Query) -> QueryResult:
         server_url = self.get_server_url()
@@ -155,25 +155,70 @@ class OpenGeminiDBClient(Client, ABC):
         resp = self.request(method='POST', server_url=server_url, url_path=UrlConst.QUERY, params=params)
         if resp.status_code == HTTPStatus.OK:
             return resolve_query_body(resp)
-        raise HTTPError(f"Query error_code: {resp.status_code}, error_msg: {resp.text}")
+        raise HTTPError(f"Query code: {resp.status_code}, body: {resp.text}")
 
     def write_batch_points(self, database: str, batch_points: BatchPoints):
         return
 
     def create_database(self, database: str, rp: RpConfig = None):
-        pass
+        if not database:
+            raise ValueError("empty database name")
+        query_string = f"CREATE DATABASE {database}"
+        if rp:
+            query_string += f" WITH DURATION {rp.duration} REPLICATION 1"
+            if rp.shard_group_duration:
+                query_string += f" SHARD DURATION {rp.shard_group_duration}"
+            if rp.index_duration:
+                query_string += f" INDEX DURATION {rp.index_duration}"
+            if rp.name:
+                query_string += f" NAME {rp.name}"
+        return self._query_post(Query(database=database, command=query_string, retention_policy=''))
 
     def show_databases(self) -> List[str]:
-        pass
+        query_string = "SHOW DATABASES"
+        qr = self.query(Query(database='', command=query_string, retention_policy=''))
+        if not qr.results or not qr.results[0].series:
+            return []
+        return [val[0] for val in qr.results[0].series[0].values if val]
 
     def drop_database(self, database: str):
-        pass
+        if not database:
+            raise ValueError("empty database name")
+        query_string = f"DROP DATABASE {database}"
+        return self._query_post(Query(database=database, command=query_string, retention_policy=''))
 
     def create_retention_policy(self, dbname, rp_config: RpConfig, is_default: bool):
-        pass
+        if not dbname:
+            raise ValueError("empty database name")
+        if not rp_config:
+            raise ValueError("rp_config is required")
 
-    def show_retention_policies(self, dbname):
-        pass
+        query_string = (f"CREATE RETENTION POLICY {rp_config.name} ON {dbname} DURATION {rp_config.duration}"
+                        f" REPLICATION 1")
+        if rp_config.shard_group_duration:
+            query_string += f" SHARD DURATION {rp_config.shard_group_duration}"
+        if rp_config.index_duration:
+            query_string += f" INDEX DURATION {rp_config.index_duration}"
+        if is_default:
+            query_string += " DEFAULT"
+
+        return self._query_post(Query(database=dbname, command=query_string, retention_policy=''))
+
+    def show_retention_policies(self, dbname: str):
+        if not dbname:
+            raise ValueError("empty database name")
+
+        query_string = f"SHOW RETENTION POLICIES ON {dbname}"
+        qr = self.query(Query(database=dbname, command=query_string, retention_policy=''))
+        if not qr.results or not qr.results[0].series:
+            return []
+        return [val for val in qr.results[0].series[0].values if val]
 
     def drop_retention_policy(self, dbname, retention_policy: str):
-        pass
+        if not dbname:
+            raise ValueError("empty database name")
+        if not retention_policy:
+            raise ValueError("empty retention policy name")
+
+        query_string = f"DROP RETENTION POLICY {retention_policy} ON {dbname}"
+        return self._query_post(Query(database=dbname, command=query_string, retention_policy=retention_policy))
