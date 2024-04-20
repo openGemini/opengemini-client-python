@@ -126,7 +126,7 @@ class OpenGeminiDBClient(Client, ABC):
         prepared = req.prepare()
         resp = self.session.send(prepared)
         if not 200 <= resp.status_code < 300:
-            raise HTTPError(f"error resp, code: {resp.status_code}, resp: {resp.text}")
+            raise HTTPError(f"request error resp, code: {resp.status_code}, body: {resp.text}")
         return resp
 
     def exec_http_request_by_index(self, idx, method, url_path, headers=None, body=None) -> requests.Response:
@@ -137,7 +137,7 @@ class OpenGeminiDBClient(Client, ABC):
     def ping(self, idx: int):
         resp = self.exec_http_request_by_index(idx, 'GET', UrlConst.PING)
         if resp.status_code != HTTPStatus.NO_CONTENT:
-            raise HTTPError(f"ping failed code: {resp.status_code}, body: {resp.text}")
+            raise HTTPError(f"ping error resp, code: {resp.status_code}, body: {resp.text}")
 
     def query(self, query: Query) -> QueryResult:
         server_url = self.get_server_url()
@@ -146,7 +146,7 @@ class OpenGeminiDBClient(Client, ABC):
         resp = self.request(method='GET', server_url=server_url, url_path=UrlConst.QUERY, params=params)
         if resp.status_code == HTTPStatus.OK:
             return resolve_query_body(resp)
-        raise HTTPError(f"Query code: {resp.status_code}, body: {resp.text}")
+        raise HTTPError(f"query error resp, code: {resp.status_code}, body: {resp.text}")
 
     def _query_post(self, query: Query) -> QueryResult:
         server_url = self.get_server_url()
@@ -155,10 +155,22 @@ class OpenGeminiDBClient(Client, ABC):
         resp = self.request(method='POST', server_url=server_url, url_path=UrlConst.QUERY, params=params)
         if resp.status_code == HTTPStatus.OK:
             return resolve_query_body(resp)
-        raise HTTPError(f"Query code: {resp.status_code}, body: {resp.text}")
+        raise HTTPError(f"query_post error resp, code: {resp.status_code}, body: {resp.text}")
 
     def write_batch_points(self, database: str, batch_points: BatchPoints):
-        return
+        server_url = self.get_server_url()
+        params = {'db': database}
+        with io.StringIO() as writer:
+            for point in batch_points.points:
+                if point is None:
+                    continue
+                writer.write(point.to_string())
+                writer.write('\n')
+            body = writer.getvalue().encode()
+        resp = self.request(method="POST", server_url=server_url, url_path=UrlConst.WRITE, params=params, body=body)
+        if resp.status_code == HTTPStatus.NO_CONTENT:
+            return
+        raise HTTPError(f"write_batch_points error resp, code: {resp.status_code}, body: {resp.text}")
 
     def create_database(self, database: str, rp: RpConfig = None):
         if not database:
