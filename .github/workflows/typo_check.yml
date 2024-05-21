@@ -1,0 +1,13 @@
+name: typo check
+on:
+  pull_request:
+    branches:
+      - main
+jobs:
+  typo_check:
+    name: typo check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check typos
+        uses: crate-ci/typos@master
