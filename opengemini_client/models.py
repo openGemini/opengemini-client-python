@@ -220,3 +220,15 @@ class QueryResult:
             if res.error is not None:
                 return res.error
         return ""
+
+
+@dataclass
+class ValuesResult:
+    measurement: str
+    values: List[Any]
+
+
+@dataclass
+class KeyValue:
+    name: str
+    value: str

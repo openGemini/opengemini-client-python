@@ -10,7 +10,8 @@ import requests
 from requests import HTTPError
 
 from opengemini_client.client import Client
-from opengemini_client.models import Config, BatchPoints, Query, QueryResult, Series, SeriesResult, RpConfig
+from opengemini_client.models import Config, BatchPoints, Query, QueryResult, Series, SeriesResult, RpConfig, \
+    ValuesResult, KeyValue
 from opengemini_client.url_const import UrlConst
 from opengemini_client.utils import AtomicInt
 
@@ -234,3 +235,56 @@ class OpenGeminiDBClient(Client, ABC):
 
         query_string = f"DROP RETENTION POLICY {retention_policy} ON {dbname}"
         return self._query_post(Query(database=dbname, command=query_string, retention_policy=retention_policy))
+
+    def _show_query_result(self, database, command: str) -> QueryResult:
+        if not database:
+            raise ValueError("empty database name")
+        if not command:
+            raise ValueError("empty query command")
+        return self.query(query=Query(database=database, command=command, retention_policy=''))
+
+    def _show_with_result_any(self, database, command: str) -> List[ValuesResult]:
+        values_results = []
+        query_results = self._show_query_result(database, command)
+        if len(query_results.results) == 0:
+            return values_results
+        for res in query_results.results[0].series:
+            values_result = ValuesResult(measurement=res.name, values=[])
+            for values in res.values:
+                for value in values:
+                    values_result.values.append(value)
+            values_results.append(values_result)
+        return values_results
+
+    def _show_with_result_key_value(self, database, command: str) -> List[ValuesResult]:
+        values_results = []
+        query_results = self._show_query_result(database, command)
+        if len(query_results.results) == 0:
+            return values_results
+        for res in query_results.results[0].series:
+            values_result = ValuesResult(measurement=res.name, values=[])
+            for values in res.values:
+                if len(values) < 2:
+                    continue
+                values_result.values.append(KeyValue(name=values[0], value=values[1]))
+            values_results.append(values_result)
+        return values_results
+
+    def show_tag_keys(self, database, command: str) -> List[ValuesResult]:
+        return self._show_with_result_any(database, command)
+
+    def show_tag_values(self, database, command: str) -> List[ValuesResult]:
+        return self._show_with_result_key_value(database, command)
+
+    def show_field_keys(self, database, command: str) -> List[ValuesResult]:
+        return self._show_with_result_key_value(database, command)
+
+    def show_series(self, database, command: str) -> List[str]:
+        values_result = self._show_with_result_any(database, command)
+        series = []
+        if len(values_result) == 0:
+            return series
+        for value in values_result[0].values:
+            if isinstance(value, str):
+                series.append(value)
+        return series
