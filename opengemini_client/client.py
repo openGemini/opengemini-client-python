@@ -4,7 +4,7 @@ client module
 from abc import ABC, abstractmethod
 from typing import List
 
-from opengemini_client.models import BatchPoints, QueryResult, Query, RpConfig
+from opengemini_client.models import BatchPoints, QueryResult, Query, RpConfig, ValuesResult
 
 
 class Client(ABC):
@@ -70,3 +70,39 @@ class Client(ABC):
     @abstractmethod
     def drop_retention_policy(self, dbname, retention_policy: str):
         pass
+
+    @abstractmethod
+    def show_tag_keys(self, database, command: str) -> List[ValuesResult]:
+        """
+        show tag keys
+        :param database: name
+        :param command: show tag keys query command
+        :return ValuesResult: query results
+        """
+
+    @abstractmethod
+    def show_tag_values(self, database, command: str) -> List[ValuesResult]:
+        """
+        show tag values
+        :param database: name
+        :param command: show tag values query command
+        :return ValuesResult: query results
+        """
+
+    @abstractmethod
+    def show_field_keys(self, database, command: str) -> List[ValuesResult]:
+        """
+        show field keys
+        :param database: name
+        :param command: show field keys query command
+        :return ValuesResult: query results
+        """
+
+    @abstractmethod
+    def show_series(self, database, command: str) -> List[str]:
+        """
+        show series
+        :param database: name
+        :param command: show series query command
+        :return ValuesResult: query results
+        """

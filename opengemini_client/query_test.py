@@ -1,7 +1,8 @@
 import datetime
+import time
 import unittest
 
-from opengemini_client import client_impl
+from opengemini_client import client_impl, test_utils
 from opengemini_client import models
 
 
@@ -21,3 +22,47 @@ class QueryTest(unittest.TestCase):
             self.assertEqual(len(results), 1)
             result = results[0]
             self.assertEqual(result.error, None)
+
+    def test_query_show_with_result_any(self):
+        with test_utils.get_test_default_client() as cli:
+            cli.create_database('show_test')
+            point = models.Point(measurement='show_mm', precision=models.Precision.PrecisionSecond,
+                                 fields={'x': 12.0, 'y': 4.0}, tags={'location': 'xy'},
+                                 timestamp=datetime.datetime.now())
+            cli.write_batch_points("show_test", models.BatchPoints(points=[point]))
+            time.sleep(3)
+            values_results = cli.show_tag_keys('show_test', 'show tag keys from show_mm')
+            print(values_results)
+            self.assertEqual(len(values_results), 1)
+            self.assertEqual(values_results[0].measurement, 'show_mm')
+
+            values_results = cli.show_tag_keys('show_test', 'show series from show_mm')
+            print(values_results)
+            self.assertEqual(len(values_results), 1)
+            self.assertEqual(len(values_results[0].values), 1)
+            self.assertRegex(values_results[0].values[0], 'show_mm')
+            cli.drop_database('show_test')
+
+    def test_query_show_with_result_key_value(self):
+        with test_utils.get_test_default_client() as cli:
+            cli.create_database('show_test1')
+            point1 = models.Point(measurement='show_mm', precision=models.Precision.PrecisionSecond,
+                                  fields={'x': 12.0, 'y': 4.0}, tags={'location': 'sz'},
+                                  timestamp=datetime.datetime.now())
+            point2 = models.Point(measurement='show_mm', precision=models.Precision.PrecisionSecond,
+                                  fields={'x': 12.0, 'y': 4.0}, tags={'location': 'gz'},
+                                  timestamp=datetime.datetime.now())
+            cli.write_batch_points("show_test1", models.BatchPoints(points=[point1, point2]))
+            time.sleep(3)
+            values_results = cli.show_tag_values('show_test1', 'show tag values from show_mm with key=location')
+            print(values_results)
+            self.assertEqual(len(values_results), 1)
+            self.assertEqual(len(values_results[0].values), 2)
+            self.assertEqual(values_results[0].measurement, 'show_mm')
+
+            values_results = cli.show_field_keys('show_test1', 'show field keys from show_mm')
+            print(values_results)
+            self.assertEqual(len(values_results), 1)
+            self.assertEqual(len(values_results[0].values), 2)
+            self.assertEqual(values_results[0].measurement, 'show_mm')
+            cli.drop_database('show_test1')
