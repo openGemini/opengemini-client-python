@@ -65,10 +65,6 @@ def resolve_query_body(resp: requests.Response):
 
 
 class OpenGeminiDBClient(Client, ABC):
-    config: Config
-    session: requests.Session
-    endpoints: List[str]
-    pre_idx: AtomicInt
 
     def __init__(self, config: Config):
         self.config = check_config(config)
