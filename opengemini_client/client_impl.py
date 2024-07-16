@@ -14,6 +14,7 @@ from opengemini_client.models import Config, BatchPoints, Query, QueryResult, Se
     ValuesResult, KeyValue
 from opengemini_client.url_const import UrlConst
 from opengemini_client.utils import AtomicInt
+from opengemini_client.models import AuthType
 
 
 def check_config(config: Config):
@@ -21,12 +22,12 @@ def check_config(config: Config):
         raise ValueError("must have at least one address")
 
     if config.auth_config is not None:
-        if config.auth_config.auth_type.PASSWORD == 0:
+        if config.auth_config.auth_type == AuthType.PASSWORD:
             if len(config.auth_config.username) == 0:
                 raise ValueError("invalid auth config due to empty username")
             if len(config.auth_config.password) == 0:
                 raise ValueError("invalid auth config due to empty password")
-        if config.auth_config.auth_type.TOKEN == 1 and len(config.auth_config.token) == 0:
+        if config.auth_config.auth_type == AuthType.TOKEN and len(config.auth_config.token) == 0:
             raise ValueError("invalid auth config due to empty token")
 
     if config.batch_config is not None:
