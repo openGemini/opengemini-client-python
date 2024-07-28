@@ -3,6 +3,7 @@
 
 # IDE
 **/.idea
+!.idea/icon.svg
 
 # Environments
 venv/**

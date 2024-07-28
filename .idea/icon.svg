@@ -1,0 +1,67 @@
+<svg width="181.514618" height="178.000000" viewBox="0 0 181.515 178" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+	<desc>
+			Created with Pixso.
+	</desc>
+	<defs>
+		<filter id="filter_22_147_dd" x="34.000000" y="95.000000" width="50.000000" height="50.000000" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+			<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+			<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+			<feOffset dx="0" dy="4"/>
+			<feGaussianBlur stdDeviation="1.33333"/>
+			<feComposite in2="hardAlpha" operator="out" k2="-1" k3="1"/>
+			<feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.3 0"/>
+			<feBlend mode="normal" in2="BackgroundImageFix" result="effect_dropShadow_1"/>
+			<feBlend mode="normal" in="SourceGraphic" in2="effect_dropShadow_1" result="shape"/>
+		</filter>
+		<filter id="filter_22_148_dd" x="60.000000" y="24.000000" width="48.000000" height="48.000000" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+			<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+			<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+			<feOffset dx="0" dy="4"/>
+			<feGaussianBlur stdDeviation="1.33333"/>
+			<feComposite in2="hardAlpha" operator="out" k2="-1" k3="1"/>
+			<feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.15 0"/>
+			<feBlend mode="normal" in2="BackgroundImageFix" result="effect_dropShadow_1"/>
+			<feBlend mode="normal" in="SourceGraphic" in2="effect_dropShadow_1" result="shape"/>
+		</filter>
+		<filter id="filter_22_151_dd" x="117.598587" y="111.023666" width="33.096741" height="43.595200" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+			<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+			<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+			<feOffset dx="0" dy="4"/>
+			<feGaussianBlur stdDeviation="1.33333"/>
+			<feComposite in2="hardAlpha" operator="out" k2="-1" k3="1"/>
+			<feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.17 0"/>
+			<feBlend mode="normal" in2="BackgroundImageFix" result="effect_dropShadow_1"/>
+			<feBlend mode="normal" in="SourceGraphic" in2="effect_dropShadow_1" result="shape"/>
+		</filter>
+		<filter id="filter_22_153_dd" x="87.718689" y="68.424965" width="62.985352" height="62.500160" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+			<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+			<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+			<feOffset dx="0" dy="4"/>
+			<feGaussianBlur stdDeviation="3"/>
+			<feComposite in2="hardAlpha" operator="out" k2="-1" k3="1"/>
+			<feColorMatrix type="matrix" values="0 0 0 0 0.098039 0 0 0 0 0.094118 0 0 0 0 0.094118 0 0 0 0.54 0"/>
+			<feBlend mode="normal" in2="BackgroundImageFix" result="effect_dropShadow_1"/>
+			<feBlend mode="normal" in="SourceGraphic" in2="effect_dropShadow_1" result="shape"/>
+		</filter>
+	</defs>
+	<ellipse id="椭圆 1" cx="90.000000" cy="89.000000" rx="90.000000" ry="89.000000" fill="#A70303"/>
+	<g filter="url(#filter_22_147_dd)">
+		<circle id="椭圆 2" r="21.000000" transform="matrix(1 0 0 1 59 116)" fill="#F7F6EE"/>
+	</g>
+	<g filter="url(#filter_22_148_dd)">
+		<circle id="椭圆 2" r="20.000000" transform="matrix(1 0 0 1 84 44)" fill="#F8F8F4"/>
+	</g>
+	<line id="直线 1" x1="107.370857" y1="83.670898" x2="86.628784" y2="51.497875" stroke="#F8F8F4" stroke-width="5.000000"/>
+	<line id="直线 5" x1="102.341797" y1="100.681213" x2="68.602783" y2="112.362572" stroke="#F9F7F7" stroke-width="5.000000"/>
+	<g filter="url(#filter_22_151_dd)">
+		<line id="直线 6" x1="123.709869" y1="112.362503" x2="144.584045" y2="145.280014" stroke="#F9F3F3" stroke-width="5.000000"/>
+	</g>
+	<path id="椭圆 3" d="M133.87 22.6718C136.825 19.067 143.289 18.6431 149.176 22.2584C156.307 26.638 159.9 35.0768 155.707 40.1906C151.515 45.3043 142.426 43.5698 136.622 37.5718C131.83 32.6204 130.915 26.2765 133.87 22.6718Z" fill-rule="evenodd" fill="#FAFAF7"/>
+	<g filter="url(#filter_22_153_dd)">
+		<ellipse id="椭圆 4" rx="22.492680" ry="22.250029" transform="matrix(0.999948 0.0102024 -0.0102024 0.999948 119.211 95.675)" fill="#F5F6EE"/>
+	</g>
+	<line id="直线 7" x1="137.767761" y1="89.556236" x2="173.193771" y2="73.424988" stroke="#FDFAFA" stroke-width="4.000000"/>
+	<line id="直线 8" x1="127.646034" y1="77.318748" x2="144.515579" y2="36.156254" stroke="#FAFAFA" stroke-width="4.000000"/>
+	<path id="椭圆 5" d="M159.086 143.207C158.892 149.008 152.595 155.306 146.404 158.097C141.365 160.369 136.219 160.406 133.691 158.141C130.495 155.277 131.435 148.67 138.299 142.741C148.08 134.293 159.371 134.714 159.086 143.207Z" fill-rule="evenodd" fill="#F7F7F4"/>
+	<path id="椭圆 6" d="M168.094 81.0582C165.344 73.4835 166.023 62.6415 171.444 61.8915C176.864 61.1416 180.461 71.3919 179.872 79.4286C179.495 84.5569 177.394 87.787 175.071 88.1085C172.748 88.4299 169.849 85.8916 168.094 81.0582Z" fill-rule="evenodd" fill="#F6F6F3"/>
+</svg>
