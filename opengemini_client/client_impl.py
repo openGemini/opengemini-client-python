@@ -36,10 +36,10 @@ def check_config(config: Config):
         if config.batch_config.batch_size <= 0:
             raise ValueError("batch enabled,batch size must be greater than 0")
 
-    if config.timeout <= datetime.timedelta(seconds=0):
+    if config.timeout is None or config.timeout <= datetime.timedelta(seconds=0):
         config.timeout = datetime.timedelta(seconds=30)
 
-    if config.connection_timeout <= datetime.timedelta(seconds=0):
+    if config.connection_timeout is None or config.connection_timeout <= datetime.timedelta(seconds=0):
         config.connection_timeout = datetime.timedelta(seconds=10)
 
     return config
