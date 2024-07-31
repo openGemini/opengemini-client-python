@@ -10,7 +10,6 @@ class AtomicInt:
     def increment(self):
         with self._lock:
             self._value += 1
-
-    def get_value(self):
-        with self._lock:
+            if self._value > 100000:
+                self._value = 0
             return self._value

@@ -84,8 +84,7 @@ class OpenGeminiDBClient(Client, ABC):
         self.session.close()
 
     def get_server_url(self):
-        self.pre_idx.increment()
-        idx = int(self.pre_idx.get_value()) % len(self.endpoints)
+        idx = int(self.pre_idx.increment()) % len(self.endpoints)
         return self.endpoints[idx]
 
     def update_headers(self, method, url_path, headers=None) -> dict:
