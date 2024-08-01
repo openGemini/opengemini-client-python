@@ -2,6 +2,7 @@ import base64
 import datetime
 import gzip
 import io
+import itertools
 from abc import ABC
 from http import HTTPStatus
 from typing import List
@@ -13,7 +14,6 @@ from opengemini_client.client import Client
 from opengemini_client.models import Config, BatchPoints, Query, QueryResult, Series, SeriesResult, RpConfig, \
     ValuesResult, KeyValue
 from opengemini_client.url_const import UrlConst
-from opengemini_client.utils import AtomicInt
 from opengemini_client.models import AuthType
 
 
@@ -72,7 +72,7 @@ class OpenGeminiDBClient(Client, ABC):
         self.session = requests.Session()
         protocol = "https://" if config.tls_enabled else "http://"
         self.endpoints = [f"{protocol}{addr.host}:{addr.port}" for addr in config.address]
-        self.pre_idx = AtomicInt(-1)
+        self.endpoints_iter = itertools.cycle(self.endpoints)
 
     def close(self):
         self.session.close()
@@ -84,9 +84,7 @@ class OpenGeminiDBClient(Client, ABC):
         self.session.close()
 
     def get_server_url(self):
-        self.pre_idx.increment()
-        idx = int(self.pre_idx.get_value()) % len(self.endpoints)
-        return self.endpoints[idx]
+        return next(self.endpoints_iter)
 
     def update_headers(self, method, url_path, headers=None) -> dict:
         if headers is None:
