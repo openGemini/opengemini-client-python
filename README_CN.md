@@ -1,6 +1,6 @@
 # opengemini-client-python
 
-![License](https://img.shields.io/badge/开源许可证-Apache2.0-green) ![language](https://img.shields.io/badge/语言-Python-blue.svg) [![release](https://img.shields.io/github/v/tag/opengemini/opengemini-client-python?label=发行版本&color=blue)](https://github.com/opengemini/opengemini-client-python/releases)
+![License](https://img.shields.io/badge/开源许可证-Apache2.0-green) ![language](https://img.shields.io/badge/语言-Python-blue.svg) [![version](https://img.shields.io/github/v/tag/opengemini/opengemini-client-python?label=%e5%8f%91%e8%a1%8c%e7%89%88%e6%9c%ac&color=blue)](https://github.com/opengemini/opengemini-client-python/releases)
 
 [English](README.md) | 简体中文 
 
