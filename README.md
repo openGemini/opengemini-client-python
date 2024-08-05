@@ -20,9 +20,12 @@ OpenGemini is a cloud-native distributed time series database, find more informa
 
 ## Usage
 
-Create a Client：
+Import Package:
 
-<i><font color=gray>The example code use the dot import, but the user should choose the package import method according to their own needs</font></i>
+```
+pip install opengemini_client
+```
+Create a Client：
 
 ```python
 from opengemini_client import Client, Address ,Config, BatchConfig

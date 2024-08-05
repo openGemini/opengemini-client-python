@@ -22,7 +22,11 @@ OpenGemini 是一款云原生分布式时序数据库。获取更多信息，请
 
 引入客户端库：
 
-<i><font color=gray>示例使用点引用法，用户可结合具体需要选择适合的引用方式。</font></i>
+```
+pip install opengemini_client
+```
+
+创建客户端:
 
 ```python
 from opengemini_client import Client, Address ,Config, BatchConfig
