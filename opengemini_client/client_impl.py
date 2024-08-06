@@ -97,7 +97,7 @@ class OpenGeminiDBClient(Client, ABC):
             if method in UrlConst.no_auth_required[url_path]:
                 return headers
 
-        if self.config.auth_config.auth_type == self.config.auth_config.auth_type.PASSWORD:
+        if self.config.auth_config.auth_type == AuthType.PASSWORD:
             encode_string = f"{self.config.auth_config.username}:{self.config.auth_config.password}"
             authorization = "Basic " + base64.b64encode(encode_string.encode()).decode()
             headers["Authorization"] = authorization
