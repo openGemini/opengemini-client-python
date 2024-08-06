@@ -20,13 +20,13 @@ OpenGemini 是一款云原生分布式时序数据库。获取更多信息，请
 
 ## 用法
 
-引入客户端库：
+安装：
 
 ```
 pip install opengemini_client
 ```
 
-创建客户端:
+快速开始：
 
 ```python
 from opengemini_client import Client, Address ,Config, BatchConfig
