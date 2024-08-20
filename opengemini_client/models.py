@@ -34,11 +34,11 @@ class BatchConfig:
 @dataclass
 class Config:
     address: List[Address]
-    batch_config: BatchConfig
-    timeout: timedelta
-    connection_timeout: timedelta
-    gzip_enabled: bool
-    tls_enabled: bool
+    batch_config: BatchConfig = None
+    timeout: timedelta = None
+    connection_timeout: timedelta = None
+    gzip_enabled: bool = False
+    tls_enabled: bool = False
     auth_config: AuthConfig = None
     tls_config: ssl.SSLContext = None
 
