@@ -29,15 +29,90 @@ pip install opengemini_client
 快速开始：
 
 ```python
-from opengemini_client import Client, Address ,Config, BatchConfig
-import datetime
+from opengemini_client import Client, Config, Address
 
-cfg = Config(address=[Address(host='127.0.0.1', port=8086)],
-                            batch_config=BatchConfig(batch_size=10, batch_interval=10),
-                            timeout=datetime.timedelta(seconds=30), connection_timeout=datetime.timedelta(seconds=10),
-                            gzip_enabled=False, tls_enabled=False
-                            )
+if __name__ == "__main__":
+    config = Config(address=[Address(host='127.0.0.1', port=8086)])
+    cli = Client(config)
+    try:
+        cli.ping(0)
+        print("ping success")
+    except Exception as error:
+        print(f"ping failed, {error}")
 
-cli = Client(cfg)
-cli.ping(0)
+```
+
+创建数据库：
+```python
+from opengemini_client import Client, Config, Address
+
+if __name__ == "__main__":
+    config = Config(address=[Address(host='127.0.0.1', port=8086)])
+    cli = Client(config)
+    try:
+        database = 'test'
+        res = cli.create_database(database=database)
+        if res.error is None:
+            print(f"create database {database} success")
+        else:
+            print(f"create database {database} failed, {res.error}")
+    except Exception as error:
+        print(f"create database {database} failed, {error}")
+
+```
+
+写入points：
+
+```python
+from opengemini_client import Client, Config, Address, Point, BatchPoints, Precision
+
+if __name__ == "__main__":
+    config = Config(address=[Address(host='127.0.0.1', port=8086)])
+    cli = Client(config)
+    try:
+        database = 'test'
+        measurement = 'test_measurement'
+        point = Point(
+            measurement=measurement,
+            precision=Precision.PrecisionSecond,
+            fields={'Humidity': 87, 'Temperature': 25},
+            tags={'Weather': 'foggy'}
+        )
+        batch_points = BatchPoints(points=[point])
+        cli.write_batch_points(database=database, batch_points=batch_points)
+        print(f"write points success")
+    except Exception as error:
+        print(f"write points failed, {error}")
+
+```
+
+查询：
+
+```python
+from opengemini_client import Client, Config, Address, Query
+
+if __name__ == "__main__":
+    config = Config(address=[Address(host='127.0.0.1', port=8086)])
+    cli = Client(config)
+    try:
+        database = 'test'
+        measurement = 'test_measurement'
+        query = Query(
+            database=database,
+            command=f'select * from {measurement}',
+            retention_policy=''
+        )
+        res = cli.query(query=query)
+        if res.error is not None:
+            print(f"query error, {res.error}")
+        else:
+            for result in res.results:
+                if result.error is not None:
+                    print(f"query result error, {result.error}")
+                    continue
+                for s in result.series:
+                    print(f"name={s.name}, columns={s.columns}, values={s.values}")
+    except Exception as error:
+        print(f"query failed, {error}")
+
 ```
