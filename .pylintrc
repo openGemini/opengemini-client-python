@@ -10,5 +10,6 @@ disable=
     too-many-instance-attributes,
     too-few-public-methods,
     too-many-arguments,
+    too-many-positional-arguments,
 [FORMAT]
 max-line-length=120

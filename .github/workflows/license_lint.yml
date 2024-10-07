@@ -12,30 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-define url const class
-"""
-
-
-class UrlConst:
-    """
-    url const class
-    """
-    PING = '/ping'
-    QUERY = '/query'
-    STATUS = '/status'
-    WRITE = '/write'
-
-    no_auth_required = {
-        '/ping': {
-            'GET',
-            'HEAD'
-        },
-        '/query': {
-            'OPTIONS'
-        },
-        '/status': {
-            'GET',
-            'HEAD'
-        }
-    }
+name: license lint
+on:
+  pull_request:
+    branches:
+      - main
+jobs:
+  build:
+    name: license lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: licenselint
+        uses: shoothzj/licenselint@main
+        with:
+          author: openGemini Authors
