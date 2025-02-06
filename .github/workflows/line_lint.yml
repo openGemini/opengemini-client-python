@@ -24,4 +24,4 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: linelint
-        uses: shoothzj/linelint@main
+        uses: hezhangjian/linelint@main

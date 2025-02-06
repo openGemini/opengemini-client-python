@@ -29,7 +29,7 @@ class WriteTest(unittest.TestCase):
             point = models.Point(measurement='write_mm', precision=models.Precision.PrecisionSecond,
                                  fields={'x': 12.0, 'y': 4.0}, tags={'a': 'ax', 'b': 'bx'}, timestamp=datetime.now())
             cli.write_batch_points("write_test", models.BatchPoints(points=[point]))
-            time.sleep(3)
+            time.sleep(5)
             qr = cli.query(models.Query(database='write_test', command='select * from write_mm', retention_policy=''))
             print(qr)
             self.assertNotEqual(len(qr.results), 0)

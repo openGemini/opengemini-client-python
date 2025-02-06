@@ -24,6 +24,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: licenselint
-        uses: shoothzj/licenselint@main
+        uses: hezhangjian/licenselint@main
         with:
           author: openGemini Authors
