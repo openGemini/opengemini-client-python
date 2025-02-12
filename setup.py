@@ -16,7 +16,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="opengemini_client",
-    version="0.0.1",
+    version="0.1.0",
     author="hezhangjian",
     author_email="hezhangjian97@gmail.com",
     description="A Python package for interacting with the opengemini",
