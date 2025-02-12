@@ -43,7 +43,7 @@ class QueryTest(unittest.TestCase):
                                  fields={'x': 12.0, 'y': 4.0}, tags={'location': 'xy'},
                                  timestamp=datetime.datetime.now())
             cli.write_batch_points("show_test", models.BatchPoints(points=[point]))
-            time.sleep(3)
+            time.sleep(5)
             values_results = cli.show_tag_keys('show_test', 'show tag keys from show_mm')
             print(values_results)
             self.assertEqual(len(values_results), 1)
@@ -66,7 +66,7 @@ class QueryTest(unittest.TestCase):
                                   fields={'x': 12.0, 'y': 4.0}, tags={'location': 'gz'},
                                   timestamp=datetime.datetime.now())
             cli.write_batch_points("show_test1", models.BatchPoints(points=[point1, point2]))
-            time.sleep(3)
+            time.sleep(5)
             values_results = cli.show_tag_values('show_test1', 'show tag values from show_mm with key=location')
             print(values_results)
             self.assertEqual(len(values_results), 1)

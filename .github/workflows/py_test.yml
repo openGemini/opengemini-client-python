@@ -25,6 +25,6 @@ jobs:
       - name: Install dependencies
         run: pip3 install -r requirements.txt
       - name: setup OpenGemini
-        uses: shoothzj/setup-opengemini-action@main
+        uses: hezhangjian/setup-opengemini-action@main
       - name: Run unit tests
         run: python -m unittest discover opengemini_client  -p '*_test.py'
