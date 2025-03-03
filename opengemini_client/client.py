@@ -19,6 +19,7 @@ from abc import ABC, abstractmethod
 from typing import List
 
 from opengemini_client.models import BatchPoints, QueryResult, Query, RpConfig, ValuesResult
+from opengemini_client.measurement import Measurement, MeasurementCondition
 
 
 class Client(ABC):
@@ -83,6 +84,18 @@ class Client(ABC):
 
     @abstractmethod
     def drop_retention_policy(self, dbname, retention_policy: str):
+        pass
+
+    @abstractmethod
+    def create_measurement(self, measurement: Measurement):
+        pass
+
+    @abstractmethod
+    def show_measurements(self, condition: MeasurementCondition) -> List[str]:
+        pass
+
+    @abstractmethod
+    def drop_measurement(self, database: str, retention_policy: str, measurement: str):
         pass
 
     @abstractmethod
