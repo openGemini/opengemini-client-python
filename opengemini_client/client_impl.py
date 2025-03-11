@@ -25,6 +25,7 @@ import requests
 from requests import HTTPError
 
 from opengemini_client.client import Client
+from opengemini_client.measurement import Measurement, MeasurementCondition
 from opengemini_client.models import Config, BatchPoints, Query, QueryResult, Series, SeriesResult, RpConfig, \
     ValuesResult, KeyValue
 from opengemini_client.url_const import UrlConst
@@ -97,10 +98,10 @@ class OpenGeminiDBClient(Client, ABC):
     def __exit__(self, _exc_type, _exc_val, _exc_tb):
         self.session.close()
 
-    def get_server_url(self):
+    def _get_server_url(self):
         return next(self.endpoints_iter)
 
-    def update_headers(self, method, url_path, headers=None) -> dict:
+    def _update_headers(self, method, url_path, headers=None) -> dict:
         if headers is None:
             headers = {}
 
@@ -121,10 +122,10 @@ class OpenGeminiDBClient(Client, ABC):
 
         return headers
 
-    def request(self, method, server_url, url_path, headers=None, body=None, params=None) -> requests.Response:
+    def _request(self, method, server_url, url_path, headers=None, body=None, params=None) -> requests.Response:
         if params is None:
             params = {}
-        headers = self.update_headers(method, url_path, headers)
+        headers = self._update_headers(method, url_path, headers)
         full_url = server_url + url_path
         if self.config.gzip_enabled and body is not None:
             compressed = io.BytesIO()
@@ -139,36 +140,37 @@ class OpenGeminiDBClient(Client, ABC):
             raise HTTPError(f"request error resp, code: {resp.status_code}, body: {resp.text}")
         return resp
 
-    def exec_http_request_by_index(self, idx, method, url_path, headers=None, body=None) -> requests.Response:
+    def _exec_http_request_by_index(self, idx, method, url_path, headers=None, body=None) -> requests.Response:
         if idx >= len(self.endpoints) or idx < 0:
             raise ValueError("openGeminiDB client error. Index out of range")
-        return self.request(method, self.endpoints[idx], url_path, headers, body)
+        return self._request(method, self.endpoints[idx], url_path, headers, body)
 
     def ping(self, idx: int):
-        resp = self.exec_http_request_by_index(idx, 'GET', UrlConst.PING)
+        resp = self._exec_http_request_by_index(idx, 'GET', UrlConst.PING)
         if resp.status_code != HTTPStatus.NO_CONTENT:
             raise HTTPError(f"ping error resp, code: {resp.status_code}, body: {resp.text}")
 
     def query(self, query: Query) -> QueryResult:
-        server_url = self.get_server_url()
-        params = {'db': query.database, 'q': query.command, 'rp': query.retention_policy}
+        server_url = self._get_server_url()
+        params = {'db': query.database, 'q': query.command, 'rp': query.retention_policy,
+                  'epoch': query.precision.epoch()}
 
-        resp = self.request(method='GET', server_url=server_url, url_path=UrlConst.QUERY, params=params)
+        resp = self._request(method='GET', server_url=server_url, url_path=UrlConst.QUERY, params=params)
         if resp.status_code == HTTPStatus.OK:
             return resolve_query_body(resp)
         raise HTTPError(f"query error resp, code: {resp.status_code}, body: {resp.text}")
 
     def _query_post(self, query: Query) -> QueryResult:
-        server_url = self.get_server_url()
+        server_url = self._get_server_url()
         params = {'db': query.database, 'q': query.command, 'rp': query.retention_policy}
 
-        resp = self.request(method='POST', server_url=server_url, url_path=UrlConst.QUERY, params=params)
+        resp = self._request(method='POST', server_url=server_url, url_path=UrlConst.QUERY, params=params)
         if resp.status_code == HTTPStatus.OK:
             return resolve_query_body(resp)
         raise HTTPError(f"query_post error resp, code: {resp.status_code}, body: {resp.text}")
 
     def write_batch_points(self, database: str, batch_points: BatchPoints):
-        server_url = self.get_server_url()
+        server_url = self._get_server_url()
         params = {'db': database}
         with io.StringIO() as writer:
             for point in batch_points.points:
@@ -177,7 +179,7 @@ class OpenGeminiDBClient(Client, ABC):
                 writer.write(point.to_string())
                 writer.write('\n')
             body = writer.getvalue().encode()
-        resp = self.request(method="POST", server_url=server_url, url_path=UrlConst.WRITE, params=params, body=body)
+        resp = self._request(method="POST", server_url=server_url, url_path=UrlConst.WRITE, params=params, body=body)
         if resp.status_code == HTTPStatus.NO_CONTENT:
             return
         raise HTTPError(f"write_batch_points error resp, code: {resp.status_code}, body: {resp.text}")
@@ -278,6 +280,39 @@ class OpenGeminiDBClient(Client, ABC):
                 values_result.values.append(KeyValue(name=values[0], value=values[1]))
             values_results.append(values_result)
         return values_results
+
+    def create_measurement(self, measurement: Measurement):
+        if measurement is None:
+            raise ValueError("empty measurement")
+        measurement.check()
+        command = measurement.to_string()
+        return self._query_post(Query(database=measurement.database, command=command, retention_policy=''))
+
+    def show_measurements(self, condition: MeasurementCondition) -> List[str]:
+        if condition is None:
+            raise ValueError("empty measurement condition")
+        condition.check()
+        command = condition.to_string()
+        result = self.query(Query(database=condition.database, command=command, retention_policy=''))
+        if result.error is not None:
+            raise HTTPError(f"show_measurements error result, error: {result.error}")
+        measurements = []
+        if len(result.results) == 0 or len(result.results[0].series) == 0:
+            return measurements
+        if result.results[0].error is not None:
+            raise HTTPError(f"show_measurements error result, error: {result.results[0].error}")
+        for v in result.results[0].series[0].values:
+            if isinstance(v[0], str):
+                measurements.append(str(v[0]))
+        return measurements
+
+    def drop_measurement(self, database: str, retention_policy: str, measurement: str):
+        if not database:
+            raise ValueError("empty database name")
+        if not measurement:
+            raise ValueError("empty measurement name")
+        command = f"DROP MEASUREMENT {measurement}"
+        return self._query_post(Query(database=database, command=command, retention_policy=retention_policy))
 
     def show_tag_keys(self, database, command: str) -> List[ValuesResult]:
         return self._show_with_result_any(database, command)

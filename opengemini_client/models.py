@@ -85,6 +85,23 @@ class Precision(Enum):
     PrecisionMinute = 4
     PrecisionHour = 5
 
+    def epoch(self) -> str:
+        if self == Precision.PrecisionNanoSecond:
+            unit = 'ns'
+        elif self == Precision.PrecisionMicrosecond:
+            unit = 'u'
+        elif self == Precision.PrecisionMillisecond:
+            unit = 'ms'
+        elif self == Precision.PrecisionSecond:
+            unit = 's'
+        elif self == Precision.PrecisionMinute:
+            unit = 'm'
+        elif self == Precision.PrecisionHour:
+            unit = 'h'
+        else:
+            unit = ''
+        return unit
+
 
 def round_datetime(dt: datetime, round_to: timedelta):
     if round_to.seconds == 0:
@@ -214,6 +231,7 @@ class Query:
     database: str
     command: str
     retention_policy: str
+    precision: Precision = Precision.PrecisionNanoSecond
 
 
 @dataclass

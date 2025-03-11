@@ -32,3 +32,13 @@ from .models import (
     SeriesResult,
     ValuesResult
 )
+
+from .measurement import (
+    FieldType,
+    ShardType,
+    IndexType,
+    EngineType,
+    ComparisonOperator,
+    Measurement,
+    MeasurementCondition
+)
