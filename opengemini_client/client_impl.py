@@ -29,7 +29,7 @@ from opengemini_client.measurement import Measurement, MeasurementCondition
 from opengemini_client.models import Config, BatchPoints, Query, QueryResult, Series, SeriesResult, RpConfig, \
     ValuesResult, KeyValue
 from opengemini_client.url_const import UrlConst
-from opengemini_client.models import AuthType
+from opengemini_client.models import AuthType, TlsConfig
 
 
 def check_config(config: Config):
@@ -44,6 +44,9 @@ def check_config(config: Config):
                 raise ValueError("invalid auth config due to empty password")
         if config.auth_config.auth_type == AuthType.TOKEN and len(config.auth_config.token) == 0:
             raise ValueError("invalid auth config due to empty token")
+
+    if config.tls_enabled and config.tls_config is None:
+        config.tls_config = TlsConfig()
 
     if config.batch_config is not None:
         if config.batch_config.batch_interval <= 0:
@@ -85,7 +88,11 @@ class OpenGeminiDBClient(Client, ABC):
     def __init__(self, config: Config):
         self.config = check_config(config)
         self.session = requests.Session()
-        protocol = "https://" if config.tls_enabled else "http://"
+        protocol = "http://"
+        if config.tls_enabled:
+            protocol = "https://"
+            self.session.cert = (config.tls_config.cert_file, config.tls_config.key_file)
+            self.session.verify = config.tls_config.ca_file
         self.endpoints = [f"{protocol}{addr.host}:{addr.port}" for addr in config.address]
         self.endpoints_iter = itertools.cycle(self.endpoints)
 
