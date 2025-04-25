@@ -30,6 +30,7 @@ from .models import (
     RpConfig,
     Series,
     SeriesResult,
+    TlsConfig,
     ValuesResult
 )
 

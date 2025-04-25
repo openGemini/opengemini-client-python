@@ -116,3 +116,40 @@ if __name__ == "__main__":
         print(f"query failed, {error}")
 
 ```
+
+开启TLS(跳过证书认证)：
+
+```python
+from opengemini_client import Client, Config, Address, TlsConfig
+
+if __name__ == "__main__":
+    config = Config(address=[Address(host='127.0.0.1', port=8443)], tls_enabled=True)
+    cli = Client(config)
+    try:
+        cli.ping(0)
+        print("ping success")
+    except Exception as error:
+        print(f"ping failed, {error}")
+
+```
+
+开启TLS(证书认证)：
+
+```python
+import ssl
+from opengemini_client import Client, Config, Address, TlsConfig
+
+if __name__ == "__main__":
+    context = ssl.SSLContext()
+    context.verify_mode = ssl.CERT_REQUIRED
+    context.load_verify_locations("ca.crt")
+    config = Config(address=[Address(host='127.0.0.1', port=8443)], tls_enabled=True,
+                    tls_config=TlsConfig(ca_file="ca.crt"))
+    cli = Client(config)
+    try:
+        cli.ping(0)
+        print("ping success")
+    except Exception as error:
+        print(f"ping failed, {error}")
+
+```

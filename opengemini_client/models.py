@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import io
-import ssl
 from dataclasses import field, dataclass
 from datetime import datetime, timedelta
 from enum import Enum
@@ -40,6 +39,13 @@ class AuthConfig:
 
 
 @dataclass
+class TlsConfig:
+    cert_file: str = ''
+    key_file: str = ''
+    ca_file: str = ''
+
+
+@dataclass
 class BatchConfig:
     batch_interval: int
     batch_size: int
@@ -54,7 +60,7 @@ class Config:
     gzip_enabled: bool = False
     tls_enabled: bool = False
     auth_config: AuthConfig = None
-    tls_config: ssl.SSLContext = None
+    tls_config: TlsConfig = None
 
 
 @dataclass
