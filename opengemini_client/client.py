@@ -52,6 +52,15 @@ class Client(ABC):
         :return: return an error message
         """
 
+    def write_by_grpc(self, database: str, batch_points: BatchPoints, rp: str = ''):
+        """
+        batch points to assigned database
+        :param database:  name
+        :param batch_points: BatchPoints object
+        :param rp: retention policy
+        :return: return an error message
+        """
+
     @abstractmethod
     def create_database(self, database: str, rp: RpConfig = None):
         """
