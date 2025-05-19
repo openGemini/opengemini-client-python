@@ -142,7 +142,8 @@ class OpenGeminiDBClient(Client, ABC):
 
         req = requests.Request(method, full_url, data=body, headers=headers, params=params)
         prepared = req.prepare()
-        resp = self.session.send(prepared)
+        timeout = (self.config.connection_timeout.seconds, self.config.timeout.seconds)
+        resp = self.session.send(prepared, timeout=timeout)
         if not 200 <= resp.status_code < 300:
             raise HTTPError(f"request error resp, code: {resp.status_code}, body: {resp.text}")
         return resp
