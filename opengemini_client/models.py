@@ -52,6 +52,14 @@ class BatchConfig:
 
 
 @dataclass
+class GrpcConfig:
+    address: List[Address]
+    auth_config: AuthConfig = None
+    tls_enable: bool = False
+    tls_config: TlsConfig = None
+
+
+@dataclass
 class Config:
     address: List[Address]
     batch_config: BatchConfig = None
@@ -61,6 +69,7 @@ class Config:
     tls_enabled: bool = False
     auth_config: AuthConfig = None
     tls_config: TlsConfig = None
+    grpc_config: GrpcConfig = None
 
 
 @dataclass
@@ -200,23 +209,29 @@ class Point:
                 else:
                     writer.write('F')
 
+    def generate_timestamp(self):
+        ts = 0
+        if self.timestamp is None:
+            return ts
+        if self.precision == Precision.PrecisionMicrosecond:
+            ts = round_datetime(self.timestamp, timedelta(microseconds=1))
+        elif self.precision == Precision.PrecisionMillisecond:
+            ts = round_datetime(self.timestamp, timedelta(milliseconds=1))
+        elif self.precision == Precision.PrecisionSecond:
+            ts = round_datetime(self.timestamp, timedelta(seconds=1))
+        elif self.precision == Precision.PrecisionMinute:
+            ts = round_datetime(self.timestamp, timedelta(minutes=1))
+        elif self.precision == Precision.PrecisionHour:
+            ts = round_datetime(self.timestamp, timedelta(hours=1))
+        else:
+            ts = self.timestamp.timestamp() * 1000 * 1000 * 1000
+        return ts
+
     def write_timestamp(self, writer: io.StringIO):
         if self.timestamp is None:
             return
         writer.write(' ')
-        if self.precision == Precision.PrecisionMicrosecond:
-            ts_str = str(round_datetime(self.timestamp, timedelta(microseconds=1)))
-        elif self.precision == Precision.PrecisionMillisecond:
-            ts_str = str(round_datetime(self.timestamp, timedelta(milliseconds=1)))
-        elif self.precision == Precision.PrecisionSecond:
-            ts_str = str(round_datetime(self.timestamp, timedelta(seconds=1)))
-        elif self.precision == Precision.PrecisionMinute:
-            ts_str = str(round_datetime(self.timestamp, timedelta(minutes=1)))
-        elif self.precision == Precision.PrecisionHour:
-            ts_str = str(round_datetime(self.timestamp, timedelta(hours=1)))
-        else:
-            ts_str = str(self.timestamp.timestamp() * 1000 * 1000 * 1000)
-        writer.write(ts_str)
+        writer.write(str(self.generate_timestamp()))
 
 
 @dataclass
