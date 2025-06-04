@@ -1,5 +1,5 @@
-[MASTER]
-ignore=static,.git
+[MAIN]
+ignore=static,.git,proto,grpc_client.py
 [MESSAGES CONTROL]
 disable=
     invalid-name,

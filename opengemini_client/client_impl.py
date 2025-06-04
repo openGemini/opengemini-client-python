@@ -17,33 +17,40 @@ import datetime
 import gzip
 import io
 import itertools
+import os.path
 from abc import ABC
 from http import HTTPStatus
 from typing import List
 
+import grpc
 import requests
 from requests import HTTPError
 
+from opengemini_client import grpc_client
 from opengemini_client.client import Client
 from opengemini_client.measurement import Measurement, MeasurementCondition
 from opengemini_client.models import Config, BatchPoints, Query, QueryResult, Series, SeriesResult, RpConfig, \
-    ValuesResult, KeyValue
+    ValuesResult, KeyValue, AuthConfig
 from opengemini_client.url_const import UrlConst
 from opengemini_client.models import AuthType, TlsConfig
+
+
+def check_auth_config(auth_config: AuthConfig):
+    if auth_config is not None:
+        if auth_config.auth_type == AuthType.PASSWORD:
+            if len(auth_config.username) == 0:
+                raise ValueError("invalid auth config due to empty username")
+            if len(auth_config.password) == 0:
+                raise ValueError("invalid auth config due to empty password")
+        if auth_config.auth_type == AuthType.TOKEN and len(auth_config.token) == 0:
+            raise ValueError("invalid auth config due to empty token")
 
 
 def check_config(config: Config):
     if len(config.address) == 0:
         raise ValueError("must have at least one address")
 
-    if config.auth_config is not None:
-        if config.auth_config.auth_type == AuthType.PASSWORD:
-            if len(config.auth_config.username) == 0:
-                raise ValueError("invalid auth config due to empty username")
-            if len(config.auth_config.password) == 0:
-                raise ValueError("invalid auth config due to empty password")
-        if config.auth_config.auth_type == AuthType.TOKEN and len(config.auth_config.token) == 0:
-            raise ValueError("invalid auth config due to empty token")
+    check_auth_config(config.auth_config)
 
     if config.tls_enabled and config.tls_config is None:
         config.tls_config = TlsConfig()
@@ -59,6 +66,17 @@ def check_config(config: Config):
 
     if config.connection_timeout is None or config.connection_timeout <= datetime.timedelta(seconds=0):
         config.connection_timeout = datetime.timedelta(seconds=10)
+
+    if config.grpc_config is None:
+        return config
+
+    if len(config.grpc_config.address) == 0:
+        raise ValueError("grpc config must have at least one address")
+
+    check_auth_config(config.grpc_config.auth_config)
+
+    if config.grpc_config.tls_enable and config.grpc_config.tls_config is None:
+        config.grpc_config.tls_config = TlsConfig()
 
     return config
 
@@ -95,6 +113,9 @@ class OpenGeminiDBClient(Client, ABC):
             self.session.verify = config.tls_config.ca_file
         self.endpoints = [f"{protocol}{addr.host}:{addr.port}" for addr in config.address]
         self.endpoints_iter = itertools.cycle(self.endpoints)
+        if self.config.grpc_config is not None:
+            self.grpc_endpoints = [f"{addr.host}:{addr.port}" for addr in config.grpc_config.address]
+            self.grpc_endpoints_iter = itertools.cycle(self.grpc_endpoints)
 
     def close(self):
         self.session.close()
@@ -107,6 +128,31 @@ class OpenGeminiDBClient(Client, ABC):
 
     def _get_server_url(self):
         return next(self.endpoints_iter)
+
+    def _get_grpc_server_url(self):
+        return next(self.grpc_endpoints_iter)
+
+    def _get_grpc_channel(self):
+        server_url = self._get_grpc_server_url()
+        if self.config.grpc_config.tls_enable is False:
+            return grpc.insecure_channel(server_url)
+
+        root_certificates = None
+        private_key = None
+        certificate_chain = None
+        if os.path.exists(self.config.grpc_config.tls_config.ca_file):
+            with open(self.config.grpc_config.tls_config.ca_file, 'rb') as fd:
+                root_certificates = fd.read()
+        if os.path.exists(self.config.grpc_config.tls_config.cert_file):
+            with open(self.config.grpc_config.tls_config.cert_file, 'rb') as fd:
+                certificate_chain = fd.read()
+        if os.path.exists(self.config.grpc_config.tls_config.key_file):
+            with open(self.config.grpc_config.tls_config.key_file, 'rb') as fd:
+                private_key = fd.read()
+        return grpc.secure_channel(
+            target=server_url,
+            credentials=grpc.ssl_channel_credentials(root_certificates, private_key, certificate_chain)
+        )
 
     def _update_headers(self, method, url_path, headers=None) -> dict:
         if headers is None:
@@ -191,6 +237,25 @@ class OpenGeminiDBClient(Client, ABC):
         if resp.status_code == HTTPStatus.NO_CONTENT:
             return
         raise HTTPError(f"write_batch_points error resp, code: {resp.status_code}, body: {resp.text}")
+
+    def write_by_grpc(self, database: str, batch_points: BatchPoints, rp: str = ''):
+        username = ''
+        password = ''
+        if self.config.grpc_config.auth_config is not None:
+            username = self.config.grpc_config.auth_config.username
+            password = self.config.grpc_config.auth_config.password
+
+        # send grpc request
+        channel = self._get_grpc_channel()
+        grpc_client.write(
+            channel=channel,
+            database=database,
+            batch_points=batch_points,
+            rp=rp,
+            username=username,
+            password=password,
+            timeout=self.config.timeout.seconds,
+        )
 
     def create_database(self, database: str, rp: RpConfig = None):
         if not database:
