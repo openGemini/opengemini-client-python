@@ -223,9 +223,9 @@ class OpenGeminiDBClient(Client, ABC):
             return resolve_query_body(resp)
         raise HTTPError(f"query_post error resp, code: {resp.status_code}, body: {resp.text}")
 
-    def write_batch_points(self, database: str, batch_points: BatchPoints):
+    def write_batch_points(self, database: str, batch_points: BatchPoints, rp: str = ''):
         server_url = self._get_server_url()
-        params = {'db': database}
+        params = {'db': database, 'rp': rp}
         with io.StringIO() as writer:
             for point in batch_points.points:
                 if point is None:

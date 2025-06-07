@@ -153,3 +153,33 @@ if __name__ == "__main__":
         print(f"ping failed, {error}")
 
 ```
+
+使用grpc协议写入points：
+```python
+from datetime import datetime
+from opengemini_client import Client, Config, Address, Point, BatchPoints, Precision
+from opengemini_client.models import GrpcConfig
+
+if __name__ == "__main__":
+    config = Config(address=[Address(host='127.0.0.1', port=8086)],
+                    grpc_config=GrpcConfig(
+                        address=[Address(host='127.0.0.1', port=8305)],
+                    ))
+    cli = Client(config)
+    try:
+        database = 'test'
+        measurement = 'test_measurement'
+        point = Point(
+            measurement=measurement,
+            precision=Precision.PrecisionSecond,
+            fields={'Humidity': 87, 'Temperature': 25},
+            tags={'Weather': 'foggy'},
+            timestamp=datetime.now(),
+        )
+        batch_points = BatchPoints(points=[point])
+        cli.write_by_grpc(database=database, batch_points=batch_points)
+        print(f"write points success")
+    except Exception as error:
+        print(f"write points failed, {error}")
+
+```
