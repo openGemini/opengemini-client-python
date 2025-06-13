@@ -16,7 +16,7 @@ import io
 from dataclasses import field, dataclass
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Dict, Union, Optional, List, Any
+from typing import Dict, Union, Optional, List, Any, Iterable
 
 
 @dataclass
@@ -236,7 +236,7 @@ class Point:
 
 @dataclass
 class BatchPoints:
-    points: List[Point] = field(default_factory=list)
+    points: Iterable[Point] = field(default_factory=list)
 
 
 @dataclass
