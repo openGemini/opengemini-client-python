@@ -1,6 +1,9 @@
 # opengemini-client-python
 
-![License](https://img.shields.io/badge/license-Apache2.0-green) ![Language](https://img.shields.io/badge/Language-Python-blue.svg) [![version](https://img.shields.io/github/v/tag/opengemini/opengemini-client-python?label=release&color=blue)](https://github.com/opengemini/opengemini-client-python/releases)
+![License](https://img.shields.io/badge/license-Apache2.0-green)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/11014/badge)](https://www.bestpractices.dev/projects/11014)
+![Language](https://img.shields.io/badge/Language-Python-blue.svg) 
+[![version](https://img.shields.io/github/v/tag/opengemini/opengemini-client-python?label=release&color=blue)](https://github.com/opengemini/opengemini-client-python/releases)
 
 English | [简体中文](README_CN.md)
 
