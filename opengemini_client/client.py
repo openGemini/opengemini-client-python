@@ -44,11 +44,12 @@ class Client(ABC):
         """
 
     @abstractmethod
-    def write_batch_points(self, database: str, batch_points: BatchPoints):
+    def write_batch_points(self, database: str, batch_points: BatchPoints, rp: str = ''):
         """
         batch points to assigned database
         :param database:  name
         :param batch_points: BatchPoints object
+        :param rp: retention policy
         :return: return an error message
         """
 
