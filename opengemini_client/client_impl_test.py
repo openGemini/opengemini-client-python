@@ -47,3 +47,38 @@ class TestClient(unittest.TestCase):
                             )
         with self.assertRaises(ValueError):
             client_impl.OpenGeminiDBClient(cfg)
+
+
+class FakeResponse:
+    def __init__(self, payload: dict):
+        self.payload = payload
+
+    def json(self) -> dict:
+        return self.payload
+
+
+class TestResolveQueryBody(unittest.TestCase):
+
+    def test_resolve_query_body_with_series_tags(self):
+        resp = FakeResponse({'results': [{'series': [{'name': 'cpu',
+                                                     'tags': {'host': 'host-1', 'region': 'cn'},
+                                                     'columns': ['time', 'value'],
+                                                     'values': [[1, 12.0]]}]}]})
+        query_result = client_impl.resolve_query_body(resp)
+        self.assertEqual(query_result.error, None)
+        self.assertEqual(len(query_result.results), 1)
+        series = query_result.results[0].series
+        self.assertEqual(len(series), 1)
+        self.assertEqual(series[0].name, 'cpu')
+        self.assertEqual(series[0].tags, {'host': 'host-1', 'region': 'cn'})
+        self.assertEqual(series[0].columns, ['time', 'value'])
+        self.assertEqual(series[0].values, [[1, 12.0]])
+
+    def test_resolve_query_body_without_series_tags(self):
+        resp = FakeResponse({'results': [{'series': [{'name': 'cpu',
+                                                     'columns': ['time', 'value'],
+                                                     'values': [[1, 12.0]]}]}]})
+        query_result = client_impl.resolve_query_body(resp)
+        series = query_result.results[0].series
+        self.assertEqual(len(series), 1)
+        self.assertEqual(series[0].tags, {})

@@ -88,6 +88,7 @@ def resolve_query_body(resp: requests.Response):
             series=[
                 Series(
                     name=series.get('name', ''),
+                    tags=series.get('tags', {}),
                     columns=series.get('columns', []),
                     values=series.get('values', [])
                 )
